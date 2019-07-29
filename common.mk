@@ -140,11 +140,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/common/etc/permissions/com.oneplus.software.xml:system/etc/permissions/com.oneplus.software.xml \
     $(LOCAL_PATH)/prebuilt/common/etc/permissions/com.oneplus.software.overseas.xml:system/etc/permissions/com.oneplus.software.overseas.xml
 
-# Google extra libraries (sketch/swipe)
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/common/lib/libsketchology_native.so:system/lib/libsketchology_native.so \
-    $(LOCAL_PATH)/prebuilt/common/lib64/libsketchology_native.so:system/lib64/libsketchology_native.so
-
 # Input
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/idc/gf_input.idc:system/usr/idc/gf_input.idc \
