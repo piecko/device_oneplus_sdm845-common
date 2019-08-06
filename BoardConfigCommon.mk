@@ -61,7 +61,9 @@ KBUILD_COMPILER_STRING := Android (5696680 based on r353983e) clang version 9.0.
 export KBUILD_COMPILER_STRING
 
 # Platform
-# TARGET_BOARD_PLATFORM := sdm845
+BOARD_USES_QCOM_HARDWARE := true
+BUILD_WITHOUT_VENDOR := true
+TARGET_BOARD_PLATFORM := sdm845
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno630
 
 # Properties
@@ -96,7 +98,6 @@ ifeq ($(HOST_OS),linux)
 endif
 
 # Display
-TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := (1 << 21)
 TARGET_USES_HWC2 := true
 
 # DRM
