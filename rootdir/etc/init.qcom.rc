@@ -1,12 +1,9 @@
 on init
-    start jamesdsp
-    mount none /system/etc/audio_effects.xml /vendor/etc/audio_effects.xml bind
     mount none /system/etc/audio_policy_configuration.xml /vendor/etc/audio/audio_policy_configuration.xml bind
     mount none /system/lib64/hw/power.qcom.so /vendor/lib64/hw/power.qcom.so bind
     mount none /system/lib64/hw/hwcomposer.sdm845.so /vendor/lib64/hw/hwcomposer.sdm845.so bind
     mount none /system/lib/modules/wlan.ko /vendor/lib/modules-aging/qca_cld3_wlan.ko bind
     mount none /system/lib/modules/wlan.ko /vendor/lib/modules/qca_cld3_wlan.ko bind
-    mount none /system/lib/soundfx/libjamesdsp.so /vendor/lib/soundfx/libjamesdsp.so bind
 
     write /dev/stune/schedtune.colocate 0
     write /dev/stune/background/schedtune.colocate 0
@@ -79,9 +76,4 @@ service dashd /sbin/dashd
     group root system
 
 service factory-hal-1-0 /system/bin/true
-    disabled
-
-service jamesdsp /system/bin/init.jamesdsp.sh
-    user root
-    oneshot
     disabled
