@@ -145,10 +145,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/idc/gf_input.idc:system/usr/idc/gf_input.idc \
     $(LOCAL_PATH)/keylayout/gf_input.kl:system/usr/keylayout/gf_input.kl
 
-# APNS
-PRODUCT_COPY_FILES += \
-$(LOCAL_PATH)/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml
-
 # Lights
 PRODUCT_PACKAGES += \
     android.hardware.light@2.0-service.oneplus_sdm845
