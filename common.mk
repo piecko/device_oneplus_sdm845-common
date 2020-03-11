@@ -165,11 +165,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_BOOT_JARS += \
     telephony-ext
 
-# Touch
-PRODUCT_PACKAGES += \
-    lineage.touch@1.0-service.oneplus_sdm845 \
-    TouchGestures
-
 # Update engine
 PRODUCT_PACKAGES += \
     update_engine \
