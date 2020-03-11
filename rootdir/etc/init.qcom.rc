@@ -7,6 +7,49 @@ on post-fs
     chown system system /sys/devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-03/c440000.qcom,spmi:qcom,pmi8998@3:qcom,haptics@c000/leds/vibrator/vmax_mv_strong
 
 on boot
+    # Touchscreen
+    chown system system /proc/touchpanel/double_tap_enable
+    chmod 0660 /proc/touchpanel/double_tap_enable
+
+    chown system system /proc/touchpanel/letter_o_enable
+    chmod 0660 /proc/touchpanel/letter_o_enable
+
+    chown system system /proc/touchpanel/music_enable
+    chmod 0660 /proc/touchpanel/music_enable
+
+    chown system system /proc/touchpanel/double_swipe_enable
+    chmod 0660 /proc/touchpanel/double_swipe_enable
+
+    chown system system /proc/touchpanel/up_arrow_enable
+    chmod 0660 /proc/touchpanel/up_arrow_enable
+
+    chown system system /proc/touchpanel/down_arrow_enable
+    chmod 0660 /proc/touchpanel/down_arrow_enable
+
+    chown system system /proc/touchpanel/left_arrow_enable
+    chmod 0660 /proc/touchpanel/left_arrow_enable
+
+    chown system system /proc/touchpanel/right_arrow_enable
+    chmod 0660 /proc/touchpanel/right_arrow_enable
+
+    chown system system /proc/touchpanel/left_swipe_enable
+    chmod 0660 /proc/touchpanel/left_swipe_enable
+
+    chown system system /proc/touchpanel/right_swipe_enable
+    chmod 0660 /proc/touchpanel/right_swipe_enable
+
+    chown system system /proc/touchpanel/up_swipe_enable
+    chmod 0660 /proc/touchpanel/up_swipe_enable
+
+    chown system system /proc/touchpanel/down_swipe_enable
+    chmod 0660 /proc/touchpanel/down_swipe_enable
+
+    chmod 0660 /sys/devices/soc/soc:fpc_fpc1020/proximity_state
+    chown system system /sys/devices/soc/soc:fpc_fpc1020/proximity_state
+
+    chmod 0660 /sys/devices/soc/soc:fpc_fpc1020/key_disable
+    chown system system /sys/devices/soc/soc:fpc_fpc1020/key_disable
+
     # Fingerprint
     chown system system /sys/devices/platform/soc/soc:goodix_fp/proximity_state
 
