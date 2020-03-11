@@ -51,6 +51,7 @@ on boot
     chown system system /sys/devices/soc/soc:fpc_fpc1020/key_disable
 
     # Fingerprint
+    chmod 0660 /sys/devices/platform/soc/soc:goodix_fp/proximity_state
     chown system system /sys/devices/platform/soc/soc:goodix_fp/proximity_state
 
     # OTG
