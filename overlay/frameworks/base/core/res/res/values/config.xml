@@ -23,9 +23,6 @@
          1: Right side -->
     <integer name="config_alertSliderLocation">1</integer>
 	    
-    <!-- Whether key handler sends intent when changing slider position -->
-    <string name="config_alertSliderIntent">org.lineageos.device.DeviceSettings.UPDATE_SLIDER_POSITION</string>
-
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">true</bool>
 
@@ -69,13 +66,13 @@
 
     <!-- Names of the key handler classes -->
     <string-array name="config_deviceKeyHandlerClasses" translatable="false">
-        <item>org.lineageos.device.DeviceSettings.KeyHandler</item>
+        <item>org.omnirom.device.KeyHandler</item>
         <item>com.android.touch.gestures.KeyHandler</item>
     </string-array>
 
     <!-- Paths to the libraries that contain device specific key handlers -->
     <string-array name="config_deviceKeyHandlerLibs" translatable="false">
-        <item>/system/priv-app/DeviceSettings/DeviceSettings.apk</item>
+        <item>/system/priv-app/DeviceParts/DeviceParts.apk</item>
         <item>/system/priv-app/TouchGestures/TouchGestures.apk</item>
     </string-array>
 

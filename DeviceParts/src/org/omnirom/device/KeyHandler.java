@@ -61,14 +61,12 @@ import android.view.KeyEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.util.omni.DeviceKeyHandler;
-import com.android.internal.util.omni.PackageUtils;
+import com.android.internal.util.aicp.DeviceKeyHandler;
+import com.android.internal.util.aicp.PackageUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.omni.OmniUtils;
-import org.omnirom.omnilib.utils.OmniVibe;
+import com.android.internal.util.aicp.AicpUtils;
+import com.android.internal.util.aicp.AicpVibe;
 import com.android.internal.statusbar.IStatusBarService;
-
-import vendor.oneplus.camera.CameraHIDL.V1_0.IOnePlusCameraProvider;
 
 public class KeyHandler implements DeviceKeyHandler {
 
@@ -183,8 +181,6 @@ public class KeyHandler implements DeviceKeyHandler {
     private boolean mDispOn;
     private boolean isFpgesture;
     private ClientPackageNameObserver mClientObserver;
-    private IOnePlusCameraProvider mProvider;
-    private boolean isOPCameraAvail;
     private boolean mRestoreUser;
     private boolean mUseSliderTorch = false;
     private boolean mTorchState = false;
@@ -339,12 +335,6 @@ public class KeyHandler implements DeviceKeyHandler {
 
             }
         }).startObserving("DEVPATH=/devices/platform/soc/soc:tri_state_key");
-
-        isOPCameraAvail = PackageUtils.isAvailableApp("com.oneplus.camera", context);
-        if (isOPCameraAvail) {
-            mClientObserver = new ClientPackageNameObserver(CLIENT_PACKAGE_PATH);
-            mClientObserver.startWatching();
-        }
     }
 
     private class EventHandler extends Handler {
@@ -368,7 +358,7 @@ public class KeyHandler implements DeviceKeyHandler {
         if (mFPcheck && mDispOn && !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY)){
             isFpgesture = true;
             if (!launchSpecialActions(value) && !isCameraLaunchEvent(event)) {
-                    OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+                    AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
                     Intent intent = createIntent(value);
                     if (DEBUG) Log.i(TAG, "intent = " + intent);
                     mContext.startActivity(intent);
@@ -433,7 +423,7 @@ public class KeyHandler implements DeviceKeyHandler {
         if (!TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY)) {
             if (DEBUG) Log.i(TAG, "isActivityLaunchEvent " + event.getScanCode() + value);
             if (!launchSpecialActions(value)) {
-                OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
                 Intent intent = createIntent(value);
                 return intent;
             }
@@ -482,10 +472,6 @@ public class KeyHandler implements DeviceKeyHandler {
         }
         if (mUseTiltCheck) {
             mSensorManager.unregisterListener(mTiltSensorListener, mTiltSensor);
-        }
-        if ((mClientObserver == null) && (isOPCameraAvail)) {
-            mClientObserver = new ClientPackageNameObserver(CLIENT_PACKAGE_PATH);
-            mClientObserver.startWatching();
         }
     }
 
@@ -582,64 +568,64 @@ public class KeyHandler implements DeviceKeyHandler {
             IStatusBarService service = getStatusBarService();
             if (service != null) {
                 try {
-                    if (mUseSliderTorch) {
+                    /*if (mUseSliderTorch) {
                         service.toggleCameraFlashState(mTorchState);
                         return true;
-                    } else {
+                    } else {*/
                         service.toggleCameraFlash();
-                        OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+                        AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
                         return true;
-                    }
+                   // }
                 } catch (RemoteException e) {
                 // do nothing.
                }
             }
         } else if (value.equals(AppSelectListPreference.MUSIC_PLAY_ENTRY)) {
             mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
             dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
             return true;
         } else if (value.equals(AppSelectListPreference.MUSIC_NEXT_ENTRY)) {
             if (isMusicActive()) {
                 mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
-                OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
                 dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_NEXT);
             }
             return true;
         } else if (value.equals(AppSelectListPreference.MUSIC_PREV_ENTRY)) {
             if (isMusicActive()) {
                 mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
-                OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
                 dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
             }
             return true;
         } else if (value.equals(AppSelectListPreference.VOLUME_UP_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
             mAudioManager.adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,AudioManager.USE_DEFAULT_STREAM_TYPE,AudioManager.FLAG_SHOW_UI);
             return true;
         } else if (value.equals(AppSelectListPreference.VOLUME_DOWN_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
             mAudioManager.adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,AudioManager.USE_DEFAULT_STREAM_TYPE,AudioManager.FLAG_SHOW_UI);
             return true;
         } else if (value.equals(AppSelectListPreference.BROWSE_SCROLL_DOWN_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
-            OmniUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_DOWN);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_DOWN);
             return true;
         } else if (value.equals(AppSelectListPreference.BROWSE_SCROLL_UP_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
-            OmniUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_UP);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_UP);
             return true;
         } else if (value.equals(AppSelectListPreference.NAVIGATE_BACK_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
-            OmniUtils.sendKeycode(KeyEvent.KEYCODE_BACK);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpUtils.sendKeycode(KeyEvent.KEYCODE_BACK);
             return true;
         } else if (value.equals(AppSelectListPreference.NAVIGATE_HOME_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
-            OmniUtils.sendKeycode(KeyEvent.KEYCODE_HOME);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpUtils.sendKeycode(KeyEvent.KEYCODE_HOME);
             return true;
         } else if (value.equals(AppSelectListPreference.NAVIGATE_RECENT_ENTRY)) {
-            OmniVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
-            OmniUtils.sendKeycode(KeyEvent.KEYCODE_APP_SWITCH);
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext);
+            AicpUtils.sendKeycode(KeyEvent.KEYCODE_APP_SWITCH);
             return true;
         }
         return false;
@@ -744,7 +730,7 @@ public class KeyHandler implements DeviceKeyHandler {
         @Override
         public void onEvent(int event, String file) {
             String pkgName = Utils.getFileValue(CLIENT_PACKAGE_PATH, "0");
-            if (event == FileObserver.MODIFY) {
+            /*if (event == FileObserver.MODIFY) {
                 try {
                     Log.d(TAG, "client_package" + file + " and " + pkgName);
                     mProvider = IOnePlusCameraProvider.getService();
@@ -752,7 +738,7 @@ public class KeyHandler implements DeviceKeyHandler {
                 } catch (RemoteException e) {
                     Log.e(TAG, "setPackageName error", e);
                 }
-            }
+            }*/
         }
     }
 
