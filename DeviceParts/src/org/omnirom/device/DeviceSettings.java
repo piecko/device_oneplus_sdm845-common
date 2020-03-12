@@ -55,8 +55,6 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String KEY_DCI_SWITCH = "dci";
     public static final String KEY_WIDE_SWITCH = "wide";
 
-    public static final String KEY_OTG_SWITCH = "otg_switch";
-
     public static final String SLIDER_DEFAULT_VALUE = "2,1,0";
 
     public static final String KEY_SETTINGS_PREFIX = "device_setting_";
@@ -67,7 +65,6 @@ public class DeviceSettings extends PreferenceFragment implements
     private ListPreference mSliderModeBottom;
     private static TwoStatePreference mHBMModeSwitch;
     private static TwoStatePreference mDCDModeSwitch;
-    private static TwoStatePreference mOtgSwitch;
 
 
     @Override
@@ -109,11 +106,6 @@ public class DeviceSettings extends PreferenceFragment implements
         mDCDModeSwitch.setEnabled(DCDModeSwitch.isSupported());
         mDCDModeSwitch.setChecked(DCDModeSwitch.isCurrentlyEnabled(this.getContext()));
         mDCDModeSwitch.setOnPreferenceChangeListener(new DCDModeSwitch(getContext()));
-
-        mOtgSwitch = (TwoStatePreference) findPreference(KEY_OTG_SWITCH);
-        mOtgSwitch.setEnabled(UsbOtgSwitch.isSupported());
-        mOtgSwitch.setChecked(UsbOtgSwitch.isCurrentlyEnabled(this.getContext()));
-        mOtgSwitch.setOnPreferenceChangeListener(new UsbOtgSwitch(getContext()));
 
     }
 

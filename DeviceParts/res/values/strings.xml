@@ -53,8 +53,6 @@
     <string name="dci_mode_title">Display-P3</string>
     <string name="Wide_mode_summary"></string>
     <string name="Wide_mode_title">AMOLED Wide Gamut</string>
-    <string name="otg_switch_summary">Enable/Disable USB-OTG support</string>
-    <string name="otg_switch_title">USB-OTG support</string>
 
     <string name="choose_app">Choose app</string>
     <string name="category_double_swipe_gesture">II gesture</string>
