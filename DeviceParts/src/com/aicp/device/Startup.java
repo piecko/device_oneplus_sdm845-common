@@ -63,8 +63,14 @@ public class Startup extends BroadcastReceiver {
             enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_WIDE_SWITCH, false);
             Settings.System.putInt(context.getContentResolver(), WideModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
 
-            String vibrStrength = sharedPrefs.getString(DeviceSettings.KEY_VIBSTRENGTH, VibratorStrengthPreference.DEFAULT_VALUE); 
-            Settings.System.putString(context.getContentResolver(), VibratorStrengthPreference.SETTINGS_KEY, vibrStrength);
+            String vibrSystemStrength = sharedPrefs.getString(DeviceSettings.KEY_SYSTEM_VIBSTRENGTH, VibratorSystemStrengthPreference.DEFAULT_VALUE);
+            Settings.System.putString(context.getContentResolver(), VibratorSystemStrengthPreference.SETTINGS_KEY, vibrSystemStrength);
+
+            String vibrCallStrength = sharedPrefs.getString(DeviceSettings.KEY_CALL_VIBSTRENGTH, VibratorCallStrengthPreference.DEFAULT_VALUE);
+            Settings.System.putString(context.getContentResolver(), VibratorCallStrengthPreference.SETTINGS_KEY, vibrCallStrength);
+
+            String vibrNotifStrength = sharedPrefs.getString(DeviceSettings.KEY_NOTIF_VIBSTRENGTH, VibratorNotifStrengthPreference.DEFAULT_VALUE);
+            Settings.System.putString(context.getContentResolver(), VibratorNotifStrengthPreference.SETTINGS_KEY, vibrNotifStrength);
 
             Settings.System.putInt(context.getContentResolver(), "omni_device_setting_imported", 1);
         }
@@ -167,6 +173,8 @@ public class Startup extends BroadcastReceiver {
         enabled = Settings.System.getInt(context.getContentResolver(), HBMModeSwitch.SETTINGS_KEY, 0) != 0;
         restore(HBMModeSwitch.getFile(), enabled);
 
-        VibratorStrengthPreference.restore(context);
+        VibratorSystemStrengthPreference.restore(context);
+        VibratorCallStrengthPreference.restore(context);
+        VibratorNotifStrengthPreference.restore(context);
     }
 }

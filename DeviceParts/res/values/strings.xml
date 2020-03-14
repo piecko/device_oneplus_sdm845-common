@@ -18,8 +18,6 @@
     <string name="device_summary">Adjust OnePlus specific device settings</string>
     <string name="category_gestures_title">Device gestures</string>
     <string name="category_vibrator">Vibrator</string>
-    <string name="vib_strength_title_head">Strength</string>
-    <string name="vib_strength_summary_head">Define the strength of the vibrator</string>
     <string name="vib_test">Test</string>
     <string name="advanced_settings">Advanced</string>
     <string name="category_slider">Slider</string>

@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2016 The OmniROM Project
+* Copyright (C) 20202 The Android Ice Cold Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 
-public class VibratorStrengthPreference extends Preference implements
+public abstract class VibratorStrengthPreference extends Preference implements
         SeekBar.OnSeekBarChangeListener {
 
     private SeekBar mSeekBar;
@@ -40,10 +41,10 @@ public class VibratorStrengthPreference extends Preference implements
     private int mMaxValue;
     private Vibrator mVibrator;
 
-    private static final String FILE_LEVEL = "/sys/class/leds/vibrator/vmax_mv_user";
-    private static final long testVibrationPattern[] = {0,250};
-    public static final String SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_VIBSTRENGTH;
-    public static final String DEFAULT_VALUE = "2008";
+    protected static String FILE_LEVEL;
+    protected static long testVibrationPattern[];
+    protected static String SETTINGS_KEY;
+    protected static String DEFAULT_VALUE;
 
     public VibratorStrengthPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,33 +69,9 @@ public class VibratorStrengthPreference extends Preference implements
         mSeekBar.setOnSeekBarChangeListener(this);
     }
 
-    public static boolean isSupported() {
-        return Utils.fileWritable(FILE_LEVEL);
-    }
+    protected abstract String getValue(Context context);
 
-    public static String getValue(Context context) {
-        String val = Utils.getFileValue(FILE_LEVEL, DEFAULT_VALUE);
-        return val;
-    }
-
-    private void setValue(String newValue, boolean withFeedback) {
-        Utils.writeValue(FILE_LEVEL, newValue);
-        Settings.System.putString(getContext().getContentResolver(), SETTINGS_KEY, newValue);
-        if (withFeedback) {
-            mVibrator.vibrate(testVibrationPattern, -1);
-        }
-    }
-
-    public static void restore(Context context) {
-        if (!isSupported()) {
-            return;
-        }
-        String storedValue = Settings.System.getString(context.getContentResolver(), SETTINGS_KEY);
-        if (storedValue == null) {
-            storedValue = DEFAULT_VALUE;
-        }
-        Utils.writeValue(FILE_LEVEL, storedValue);
-    }
+    protected abstract void setValue(String newValue, boolean withFeedback);
 
     public void onProgressChanged(SeekBar seekBar, int progress,
             boolean fromTouch) {
