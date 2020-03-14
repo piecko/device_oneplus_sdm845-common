@@ -65,7 +65,7 @@
     </string-array>
 
     <!-- Names of the key handler class -->
-    <string name="config_deviceKeyHandlerClass" translatable="false">org.omnirom.device.KeyHandler</string>
+    <string name="config_deviceKeyHandlerClass" translatable="false">com.aicp.device.KeyHandler</string>
 
     <!-- Paths to the library that contain device specific key handler -->
     <string name="config_deviceKeyHandlerLib" translatable="false">/system/priv-app/DeviceParts/DeviceParts.apk</string>

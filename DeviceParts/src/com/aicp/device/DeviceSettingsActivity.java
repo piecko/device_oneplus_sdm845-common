@@ -15,7 +15,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 */
-package org.omnirom.device;
+package com.aicp.device;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,16 +25,15 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.preference.PreferenceFragment;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class GestureSettingsActivity extends Activity {
+public class DeviceSettingsActivity extends Activity {
 
-    private GestureSettings mGestureSettingsFragment;
-
+    private DeviceSettings mDeviceSettingsFragment;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +42,12 @@ public class GestureSettingsActivity extends Activity {
 
         Fragment fragment = getFragmentManager().findFragmentById(android.R.id.content);
         if (fragment == null) {
-            mGestureSettingsFragment = new GestureSettings();
+            mDeviceSettingsFragment = new DeviceSettings();
             getFragmentManager().beginTransaction()
-                .add(android.R.id.content, mGestureSettingsFragment)
+                .add(android.R.id.content, mDeviceSettingsFragment)
                 .commit();
         } else {
-            mGestureSettingsFragment = (GestureSettings) fragment;
+            mDeviceSettingsFragment = (DeviceSettings) fragment;
         }
     }
 

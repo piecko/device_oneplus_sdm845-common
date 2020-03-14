@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 The OmniROM Project
+* Copyright (C) 2019 The OmniROM Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,28 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 *
 */
-package org.omnirom.device;
+package com.aicp.device;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.provider.Settings;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceManager;
 
-import org.omnirom.device.DeviceSettings;
+import com.aicp.device.DeviceSettings;
 
-public class SRGBModeSwitch {
+public class DCDModeSwitch implements OnPreferenceChangeListener {
 
-    private static final String FILE = "/sys/devices/platform/soc/ae00000.qcom,mdss_mdp/drm/card0/card0-DSI-1/native_display_srgb_color_mode";
+    private static final String FILE = "/sys/class/drm/card0-DSI-1/dimlayer_bl_en";
 
-    public static final String SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_SRGB_SWITCH;
+    public static final String SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_DCD_SWITCH;
+
+    private Context mContext;
+
+    public DCDModeSwitch(Context context) {
+        mContext = context;
+    }
 
     public static String getFile() {
         if (Utils.fileWritable(FILE)) {
@@ -44,5 +51,13 @@ public class SRGBModeSwitch {
 
     public static boolean isCurrentlyEnabled(Context context) {
         return Utils.getFileValueAsBoolean(getFile(), false);
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        Boolean enabled = (Boolean) newValue;
+        Settings.System.putInt(mContext.getContentResolver(), SETTINGS_KEY, enabled ? 1 : 0);
+        Utils.writeValue(getFile(), enabled ? "1" : "0");
+        return true;
     }
 }
