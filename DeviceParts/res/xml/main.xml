@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (C) 2014-2016 The OmniROM Project
+     Copyright (C) 2020 The Android Ice Cold Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,47 +15,42 @@
      limitations under the License.
 -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:key="gesture_category"
-        android:title="@string/category_gestures_title"
-        android:summary="@string/category_gestures_summary"
-        android:icon="@drawable/ic_gesture"
-        android:persistent="false" >
-        <intent android:action="android.intent.action.MAIN"
-                android:targetPackage="com.aicp.device"
-                android:targetClass="com.aicp.device.GestureSettingsActivity" />
-    </Preference>
-
-    <Preference
-        android:key="doze_category"
-        android:title="@string/doze_category_title"
-        android:summary="@string/doze_category_summary"
-        android:persistent="false" >
-        <intent android:action="android.intent.action.MAIN"
-                android:targetPackage="org.lineageos.settings.doze"
-                android:targetClass="org.lineageos.settings.doze.DozeSettingsActivity" />
-    </Preference>
+    <PreferenceCategory
+        android:key="graphics"
+        android:title="@string/graphics_title">
+        <SwitchPreference
+            android:key="dcd"
+            android:summary="@string/dcd_mode_summary"
+            android:title="@string/dcd_mode_title" />
+        <SwitchPreference
+            android:key="hbm"
+            android:summary="@string/hbm_mode_summary"
+            android:title="@string/hbm_mode_title"
+            android:persistent="false" />
+        <Preference
+            android:key="panel_category"
+            android:title="@string/panel_category_title"
+            android:summary="@string/panel_category_summary"
+            android:persistent="false" >
+            <intent android:action="android.intent.action.MAIN"
+                    android:targetPackage="com.aicp.device"
+                    android:targetClass="com.aicp.device.PanelSettingsActivity" />
+        </Preference>
+    </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/category_vibrator">
-        <com.aicp.device.VibratorSystemStrengthPreference
-            android:key="vib_system_strength"
-            android:title="@string/vib_strength_title"
-            android:summary="@string/vib_strength_summary"
-            android:icon="@drawable/ic_vibration"
-            android:persistent="false" />
-        <com.aicp.device.VibratorCallStrengthPreference
-            android:key="vib_call_strength"
-            android:title="@string/vib_call_strength_title"
-            android:summary="@string/vib_call_strength_summary"
-            android:icon="@drawable/ic_call"
-            android:persistent="false" />
-        <com.aicp.device.VibratorNotifStrengthPreference
-            android:key="vib_notif_strength"
-            android:title="@string/vib_notif_strength_title"
-            android:summary="@string/vib_notif_strength_summary"
-            android:icon="@drawable/ic_notifications"
-            android:persistent="false" />
+        android:key="gestures"
+        android:title="@string/screen_gestures_panel_title">
+
+        <Preference
+            android:key="gesture_category"
+            android:title="@string/category_gestures_title"
+            android:summary="@string/category_gestures_summary"
+            android:persistent="false" >
+            <intent android:action="android.intent.action.MAIN"
+                    android:targetPackage="com.aicp.device"
+                    android:targetClass="com.aicp.device.GestureSettingsActivity" />
+        </Preference>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -82,40 +78,26 @@
             android:persistent="false" />
     </PreferenceCategory>
 
-    <!-- <PreferenceCategory
-        android:title="@string/buttons_title"
-        android:key="buttons_category">
-        <SwitchPreference
-            android:key="swap_back_recents"
-            android:summary="@string/swap_back_recents_summary"
-            android:title="@string/swap_back_recents_title"
-            android:persistent="false" />
-    </PreferenceCategory> -->
-
     <PreferenceCategory
-        android:key="graphics"
-        android:title="@string/graphics_title">
-        <SwitchPreference
-            android:key="dcd"
-            android:summary="@string/dcd_mode_summary"
-            android:title="@string/dcd_mode_title"
-            android:icon="@drawable/ic_dc"
+        android:title="@string/category_vibrator">
+        <com.aicp.device.VibratorSystemStrengthPreference
+            android:key="vib_system_strength"
+            android:title="@string/vib_strength_title"
+            android:summary="@string/vib_strength_summary"
+            android:icon="@drawable/ic_vibration"
             android:persistent="false" />
-        <SwitchPreference
-            android:key="hbm"
-            android:summary="@string/hbm_mode_summary"
-            android:title="@string/hbm_mode_title"
-            android:icon="@drawable/ic_hbm"
+        <com.aicp.device.VibratorCallStrengthPreference
+            android:key="vib_call_strength"
+            android:title="@string/vib_call_strength_title"
+            android:summary="@string/vib_call_strength_summary"
+            android:icon="@drawable/ic_call"
             android:persistent="false" />
-        <Preference
-            android:key="panel_category"
-            android:title="@string/panel_category_title"
-            android:summary="@string/panel_category_summary"
-            android:icon="@drawable/ic_panel"
-            android:persistent="false" >
-            <intent android:action="android.intent.action.MAIN"
-                    android:targetPackage="com.aicp.device"
-                    android:targetClass="com.aicp.device.PanelSettingsActivity" />
-        </Preference>
+        <com.aicp.device.VibratorNotifStrengthPreference
+            android:key="vib_notif_strength"
+            android:title="@string/vib_notif_strength_title"
+            android:summary="@string/vib_notif_strength_summary"
+            android:icon="@drawable/ic_notifications"
+            android:persistent="false" />
     </PreferenceCategory>
+
 </PreferenceScreen>
