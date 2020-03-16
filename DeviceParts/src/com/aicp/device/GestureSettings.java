@@ -45,6 +45,7 @@ import android.widget.ListView;
 import android.util.Log;
 import static android.provider.Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED;
 import android.os.UserHandle;
+import static com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -81,6 +82,7 @@ public class GestureSettings extends PreferenceFragment implements
 
     private TwoStatePreference mProxiSwitch;
     private TwoStatePreference mFpSwipeDownSwitch;
+    private TwoStatePreference mOffscreenGestureFeedbackSwitch;
     private AppSelectListPreference mDoubleSwipeApp;
     private AppSelectListPreference mCircleApp;
     private AppSelectListPreference mDownArrowApp;
@@ -107,6 +109,10 @@ public class GestureSettings extends PreferenceFragment implements
         mProxiSwitch = (TwoStatePreference) findPreference(KEY_PROXI_SWITCH);
         mProxiSwitch.setChecked(Settings.System.getInt(getContext().getContentResolver(),
                 Settings.System.OMNI_DEVICE_PROXI_CHECK_ENABLED, 1) != 0);
+
+        mOffscreenGestureFeedbackSwitch = (TwoStatePreference) findPreference(KEY_OFF_SCREEN_GESTURE_FEEDBACK_SWITCH);
+        mOffscreenGestureFeedbackSwitch.setChecked(Settings.System.getInt(getContext().getContentResolver(),
+                "Settings.System."+com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, 1) != 0);
 
         mDoubleSwipeApp = (AppSelectListPreference) findPreference(KEY_DOUBLE_SWIPE_APP);
         mDoubleSwipeApp.setEnabled(isGestureSupported(KEY_DOUBLE_SWIPE_APP));
@@ -181,6 +187,11 @@ public class GestureSettings extends PreferenceFragment implements
         if (preference == mProxiSwitch) {
             Settings.System.putInt(getContext().getContentResolver(),
                     Settings.System.OMNI_DEVICE_PROXI_CHECK_ENABLED, mProxiSwitch.isChecked() ? 1 : 0);
+            return true;
+        }
+       if (preference == mOffscreenGestureFeedbackSwitch) {
+            Settings.System.putInt(getContext().getContentResolver(),
+                    "Settings.System."+com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, mOffscreenGestureFeedbackSwitch.isChecked() ? 1 : 0);
             return true;
         }
         return super.onPreferenceTreeClick(preference);
