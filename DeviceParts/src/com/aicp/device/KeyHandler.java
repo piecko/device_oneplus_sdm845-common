@@ -304,7 +304,7 @@ public class KeyHandler implements DeviceKeyHandler {
                     boolean ringing = state.contains("USB=0");
                     boolean silent = state.contains("(null)=0");
                     boolean vibrate = state.contains("USB_HOST=0");
-                    android.util.Log.v("DeviceParts", "Got ringing = " + ringing + ", silent = " + silent + ", vibrate = " + vibrate);
+                    Log.v(TAG, "Got ringing = " + ringing + ", silent = " + silent + ", vibrate = " + vibrate);
                     if(ringing && !silent && !vibrate)
                         doHandleSliderAction(2);
                     if(silent && !ringing && !vibrate)
@@ -312,7 +312,7 @@ public class KeyHandler implements DeviceKeyHandler {
                     if(vibrate && !silent && !ringing)
                         doHandleSliderAction(1);
                 } catch(Exception e) {
-                    android.util.Log.d("DeviceParts", "Failed parsing uevent", e);
+                    Log.d(TAG, "Failed parsing uevent", e);
                 }
 
             }
