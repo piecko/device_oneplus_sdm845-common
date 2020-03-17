@@ -159,9 +159,7 @@ public class KeyHandler implements DeviceKeyHandler {
     private boolean mUseWaveCheck;
     private Sensor mPocketSensor;
     private boolean mUsePocketCheck;
-    private boolean mFPcheck;
     private boolean mDispOn;
-    private boolean isFpgesture;
     private ClientPackageNameObserver mClientObserver;
     private boolean mRestoreUser;
     private boolean mUseSliderTorch = false;
