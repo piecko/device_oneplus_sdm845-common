@@ -557,34 +557,6 @@ public class KeyHandler implements DeviceKeyHandler {
                 dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
             }
             return true;
-        } else if (value.equals(AppSelectListPreference.VOLUME_UP_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            mAudioManager.adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,AudioManager.USE_DEFAULT_STREAM_TYPE,AudioManager.FLAG_SHOW_UI);
-            return true;
-        } else if (value.equals(AppSelectListPreference.VOLUME_DOWN_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            mAudioManager.adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,AudioManager.USE_DEFAULT_STREAM_TYPE,AudioManager.FLAG_SHOW_UI);
-            return true;
-        } else if (value.equals(AppSelectListPreference.BROWSE_SCROLL_DOWN_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            AicpUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_DOWN);
-            return true;
-        } else if (value.equals(AppSelectListPreference.BROWSE_SCROLL_UP_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            AicpUtils.sendKeycode(KeyEvent.KEYCODE_PAGE_UP);
-            return true;
-        } else if (value.equals(AppSelectListPreference.NAVIGATE_BACK_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            AicpUtils.sendKeycode(KeyEvent.KEYCODE_BACK);
-            return true;
-        } else if (value.equals(AppSelectListPreference.NAVIGATE_HOME_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            AicpUtils.sendKeycode(KeyEvent.KEYCODE_HOME);
-            return true;
-        } else if (value.equals(AppSelectListPreference.NAVIGATE_RECENT_ENTRY)) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
-            AicpUtils.sendKeycode(KeyEvent.KEYCODE_APP_SWITCH);
-            return true;
         } else if (value.equals(AppSelectListPreference.AMBIENT_DISPLAY_ENTRY)) {
             AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
             launchDozePulse();
