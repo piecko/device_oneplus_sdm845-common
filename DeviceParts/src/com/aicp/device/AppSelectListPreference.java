@@ -227,10 +227,6 @@ public class AppSelectListPreference extends CustomDialogPreference {
                 R.drawable.ic_music_play, MUSIC_PLAY_ENTRY);
         mInstalledPackages.add(0, musicPlayItem);
 
-        PackageItem wakeItem = new PackageItem(getContext().getResources().getString(R.string.wake_entry),
-                R.drawable.ic_wakeup, WAKE_ENTRY);
-        mInstalledPackages.add(0, wakeItem);
-
 	PackageItem ambientDisplay = new PackageItem(getContext().getResources().getString(R.string.ambient_display_entry),
                 R.drawable.ic_ambient_display, AMBIENT_DISPLAY_ENTRY);
         mInstalledPackages.add(0, ambientDisplay);
@@ -314,9 +310,6 @@ public class AppSelectListPreference extends CustomDialogPreference {
             } else if (name.equals(MUSIC_PREV_ENTRY)) {
                 mTitle = getContext().getResources().getString(R.string.music_prev_entry);
                 mAppIconResourceId = R.drawable.ic_music_prev;
-            } else if (name.equals(WAKE_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.wake_entry);
-                mAppIconResourceId = R.drawable.ic_wakeup;
             } else {
                 ComponentName componentName = ComponentName.unflattenFromString(name);
                 PackageItem item = mAdapter.resolveApplication(componentName);
