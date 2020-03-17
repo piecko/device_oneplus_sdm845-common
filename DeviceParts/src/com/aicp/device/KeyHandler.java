@@ -585,6 +585,10 @@ public class KeyHandler implements DeviceKeyHandler {
             AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
             AicpUtils.sendKeycode(KeyEvent.KEYCODE_APP_SWITCH);
             return true;
+        } else if (value.equals(AppSelectListPreference.AMBIENT_DISPLAY_ENTRY)) {
+            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext,GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,GESTURE_HAPTIC_DURATION);
+            launchDozePulse();
+            return true;
         }
         return false;
     }
