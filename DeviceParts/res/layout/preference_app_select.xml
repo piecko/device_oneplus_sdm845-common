@@ -39,6 +39,7 @@
             android:id="@android:id/icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:padding="12dp"
             android:gravity="center"
             android:scaleType="centerInside" />
     </LinearLayout>
