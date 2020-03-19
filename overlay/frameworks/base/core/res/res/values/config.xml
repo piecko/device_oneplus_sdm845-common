@@ -225,10 +225,6 @@
     -->
     <bool name="config_powerDecoupleAutoSuspendModeFromDisplay">true</bool>
 
-    <!-- make sure you enable this only if your device supports deep slepp
-    with active proximity sensor event listener -->
-    <bool name="config_proxiSensorWakupCheck">true</bool>
-
     <!-- Telephony qualified networks service package name to bind to by default. -->
     <string name="config_qualified_networks_service_package">vendor.qti.iwlan</string>
 

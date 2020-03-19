@@ -78,7 +78,6 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int GESTURE_WAKELOCK_DURATION = 2000;
     public static final String GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME = "OFF_GESTURE_HAPTIC_ENABLE";
     private static final int GESTURE_HAPTIC_DURATION = 50;
-    private static final String GOODIX_CONTROL_PATH = "/sys/devices/platform/soc/soc:goodix_fp/proximity_state";
     private static final String DT2W_CONTROL_PATH = "/proc/touchpanel/double_tap_enable";
 
     private static final int GESTURE_CIRCLE_SCANCODE = 250;
@@ -151,7 +150,6 @@ public class KeyHandler implements DeviceKeyHandler {
     private final AudioManager mAudioManager;
     private SensorManager mSensorManager;
     private boolean mProxyIsNear;
-    private boolean mUseProxiCheck;
     private Sensor mTiltSensor;
     private boolean mUseTiltCheck;
     private boolean mProxyWasNear;
@@ -171,11 +169,6 @@ public class KeyHandler implements DeviceKeyHandler {
         public void onSensorChanged(SensorEvent event) {
             mProxyIsNear = event.values[0] == 1;
             if (DEBUG_SENSOR) Log.i(TAG, "mProxyIsNear = " + mProxyIsNear + " mProxyWasNear = " + mProxyWasNear);
-            if (mUseProxiCheck) {
-                if (Utils.fileWritable(GOODIX_CONTROL_PATH)) {
-                    Utils.writeValue(GOODIX_CONTROL_PATH, mProxyIsNear ? "1" : "0");
-                }
-            }
             if (mUseWaveCheck || mUsePocketCheck) {
                 if (mProxyWasNear && !mProxyIsNear) {
                     long delta = SystemClock.elapsedRealtime() - mProxySensorTimestamp;
@@ -245,9 +238,6 @@ public class KeyHandler implements DeviceKeyHandler {
         }
 
         public void update() {
-            mUseProxiCheck = Settings.System.getIntForUser(
-                    mContext.getContentResolver(), Settings.System.OMNI_DEVICE_PROXI_CHECK_ENABLED, 1,
-                    UserHandle.USER_CURRENT) == 1;
             mDoubleTapToWake = Settings.Secure.getIntForUser(
                     mContext.getContentResolver(), Settings.Secure.DOUBLE_TAP_TO_WAKE, 0,
                     UserHandle.USER_CURRENT) == 1;
@@ -339,12 +329,6 @@ public class KeyHandler implements DeviceKeyHandler {
 
     @Override
     public boolean isDisabledKeyEvent(KeyEvent event) {
-        boolean isProxyCheckRequired = mUseProxiCheck &&
-                ArrayUtils.contains(sProxiCheckedGestures, event.getScanCode());
-        if (mProxyIsNear && isProxyCheckRequired) {
-            if (DEBUG) Log.i(TAG, "isDisabledKeyEvent: blocked by proxi sensor - scanCode=" + event.getScanCode());
-            return true;
-        }
         return false;
     }
 
@@ -422,29 +406,13 @@ public class KeyHandler implements DeviceKeyHandler {
 
     private void onDisplayOn() {
         if (DEBUG) Log.i(TAG, "Display on");
-        if (enableProxiSensor()) {
-            mSensorManager.unregisterListener(mProximitySensor, mPocketSensor);
-            enableGoodix();
-        }
         if (mUseTiltCheck) {
             mSensorManager.unregisterListener(mTiltSensorListener, mTiltSensor);
         }
     }
 
-    private void enableGoodix() {
-        if (Utils.fileWritable(GOODIX_CONTROL_PATH)) {
-            Utils.writeValue(GOODIX_CONTROL_PATH, "0");
-        }
-    }
-
     private void onDisplayOff() {
         if (DEBUG) Log.i(TAG, "Display off");
-        if (enableProxiSensor()) {
-            mProxyWasNear = false;
-            mSensorManager.registerListener(mProximitySensor, mPocketSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-            mProxySensorTimestamp = SystemClock.elapsedRealtime();
-        }
         if (mUseTiltCheck) {
             mSensorManager.registerListener(mTiltSensorListener, mTiltSensor,
                     SensorManager.SENSOR_DELAY_NORMAL);
@@ -499,10 +467,10 @@ public class KeyHandler implements DeviceKeyHandler {
             mTorchState = true;
         }
 
-        if (((!mProxyIsNear && mUseProxiCheck) || !mUseProxiCheck) && mUseSliderTorch && action < 4) {
+        if (!mProxyIsNear && mUseSliderTorch && action < 4) {
             launchSpecialActions(AppSelectListPreference.TORCH_ENTRY);
             mUseSliderTorch = false;
-        } else if (((!mProxyIsNear && mUseProxiCheck) || !mUseProxiCheck) && mUseSliderTorch) {
+        } else if (!mProxyIsNear && mUseSliderTorch) {
             launchSpecialActions(AppSelectListPreference.TORCH_ENTRY);
         }
 
@@ -606,7 +574,7 @@ public class KeyHandler implements DeviceKeyHandler {
     }
 
     private boolean enableProxiSensor() {
-        return mUsePocketCheck || mUseWaveCheck || mUseProxiCheck;
+        return mUsePocketCheck || mUseWaveCheck;
     }
 
     private void updateDozeSettings() {
