@@ -18,6 +18,9 @@
      for different hardware and product builds.  Do not translate. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <!-- Whether key handler sends intent when changing slider position -->
+    <string name="config_alertSliderIntent">com.aicp.device.UPDATE_SLIDER_POSITION</string>
+
     <!-- The location of the devices physical tri state switch
          0: Left side
          1: Right side -->

@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2016 The OmniROM Project
+* Copyright (C) 2020 The Android Ice Cold Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,8 @@ package com.aicp.device;
 
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
+import static android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
 
 import android.app.ActivityManagerNative;
 import android.app.NotificationManager;
@@ -38,6 +41,7 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.os.FileObserver;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -80,6 +84,11 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int GESTURE_HAPTIC_DURATION = 50;
     private static final String DT2W_CONTROL_PATH = "/proc/touchpanel/double_tap_enable";
 
+    public static final String ACTION_UPDATE_SLIDER_POSITION
+            = "com.aicp.device.UPDATE_SLIDER_POSITION";
+    public static final String EXTRA_SLIDER_POSITION = "position";
+    public static final String EXTRA_SLIDER_POSITION_VALUE = "position_value";
+
     private static final int GESTURE_CIRCLE_SCANCODE = 250;
     private static final int GESTURE_V_SCANCODE = 252;
     private static final int GESTURE_II_SCANCODE = 251;
@@ -106,6 +115,15 @@ public class KeyHandler implements DeviceKeyHandler {
 
     public static final String CLIENT_PACKAGE_NAME = "com.oneplus.camera";
     public static final String CLIENT_PACKAGE_PATH = "/data/misc/omni/client_package_name";
+    // TriStateUI Modes
+    public static final int MODE_TOTAL_SILENCE = 600;
+    public static final int MODE_ALARMS_ONLY = 601;
+    public static final int MODE_PRIORITY_ONLY = 602;
+    public static final int MODE_NONE = 603;
+    public static final int MODE_VIBRATE = 604;
+    public static final int MODE_RING = 605;
+    // AICP additions: arbitrary value which hopefully doesn't conflict with upstream anytime soon
+    public static final int MODE_SILENT = 620;
 
     private static final int[] sSupportedGestures = new int[]{
         GESTURE_II_SCANCODE,
@@ -441,27 +459,47 @@ public class KeyHandler implements DeviceKeyHandler {
 
     private void doHandleSliderAction(int position) {
         int action = getSliderAction(position);
-        if ( action == 0) {
+        int positionValue = 0;
+        if (action == 0) {
             mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
             mTorchState = false;
+            positionValue = MODE_RING;
         } else if (action == 1) {
             mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
             mTorchState = false;
+            positionValue = MODE_VIBRATE;
         } else if (action == 2) {
             mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
             mTorchState = false;
+            positionValue = MODE_SILENT;
         } else if (action == 3) {
             mNoMan.setZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
             mTorchState = false;
+            positionValue = MODE_PRIORITY_ONLY;
         } else if (action == 4) {
+            mNoMan.setZenMode(ZEN_MODE_ALARMS, null, TAG);
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+            mTorchState = false;
+            positionValue = MODE_ALARMS_ONLY;
+        } else if (action == 5) {
+            mNoMan.setZenMode(ZEN_MODE_NO_INTERRUPTIONS, null, TAG);
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+            mTorchState = false;
+            positionValue = MODE_TOTAL_SILENCE;
+        } else if (action == 6) {
             mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+            positionValue = MODE_RING;
             mUseSliderTorch = true;
             mTorchState = true;
+        }
+
+        if (positionValue != 0) {
+            sendUpdateBroadcast(position, positionValue);
         }
 
         if (!mProxyIsNear && mUseSliderTorch && action < 4) {
@@ -471,6 +509,18 @@ public class KeyHandler implements DeviceKeyHandler {
             launchSpecialActions(AppSelectListPreference.TORCH_ENTRY);
         }
 
+    }
+
+    private void sendUpdateBroadcast(int position, int position_value) {
+        Bundle extras = new Bundle();
+        Intent intent = new Intent(ACTION_UPDATE_SLIDER_POSITION);
+        extras.putInt(EXTRA_SLIDER_POSITION, position);
+        extras.putInt(EXTRA_SLIDER_POSITION_VALUE, position_value);
+        intent.putExtras(extras);
+        mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        Log.d(TAG, "slider change to positon " + position
+                            + " with value " + position_value);
     }
 
     private Intent createIntent(String value) {

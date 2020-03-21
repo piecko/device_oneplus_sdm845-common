@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <protected-broadcast android:name="com.android.systemui.doze.pulse" />
+    <protected-broadcast android:name="com.aicp.device.UPDATE_SLIDER_POSITION" />
 
     <uses-sdk
         android:minSdkVersion="28"
