@@ -44,11 +44,27 @@
             android:title="@string/category_right_arrow_gesture"
             android:persistent="false"/>
 
+        <!--
+	<com.aicp.device.AppSelectListPreference
+            android:key="gesture_m_app"
+            android:title="@string/category_s_gesture"
+            android:persistent="false"/>
+
+        <com.aicp.device.AppSelectListPreference
+            android:key="gesture_w_app"
+            android:title="@string/category_w_gesture"
+            android:persistent="false"/>
+
+        <com.aicp.device.AppSelectListPreference
+            android:key="gesture_s_app"
+            android:title="@string/category_s_gesture"
+            android:persistent="false"/>
+
         <com.aicp.device.AppSelectListPreference
             android:key="up_arrow_gesture_app"
             android:title="@string/category_up_arrow_gesture"
             android:persistent="false" />
-
+        -->
         <com.aicp.device.AppSelectListPreference
             android:key="down_arrow_gesture_app"
             android:title="@string/category_down_arrow_gesture"

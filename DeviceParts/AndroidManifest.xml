@@ -12,15 +12,17 @@
     <protected-broadcast android:name="com.android.systemui.doze.pulse" />
 
     <uses-sdk
-        android:minSdkVersion="26"
-        android:targetSdkVersion="26" />
+        android:minSdkVersion="28"
+        android:targetSdkVersion="29" />
+
     <application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/device_title"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:theme="@style/AppTheme"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         tools:replace="android:appComponentFactory"
         android:supportsRtl="true" >
+
         <activity
             android:name=".DeviceSettingsActivity"
             android:label="@string/device_title">
@@ -36,6 +38,9 @@
             <meta-data android:name="com.android.settings.summary"
                 android:resource="@string/device_summary" />
         </activity>
+
+        <activity android:name=".KeyHandler" />
+
         <activity-alias
             android:name="com.aicp.device.DeviceSettings"
             android:exported="true"
@@ -46,6 +51,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity-alias>
+
         <activity
             android:name="com.aicp.device.GestureSettingsActivity"
             android:exported="false"
@@ -56,6 +62,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.aicp.device.PanelSettingsActivity"
             android:exported="true"
@@ -66,11 +73,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <receiver android:name="com.aicp.device.Startup" >
             <intent-filter android:priority="100" >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
         <service
             android:name="com.aicp.device.PanelModeTileService"
             android:icon="@drawable/ic_panel_tile"
@@ -81,6 +90,7 @@
                     android:name="android.service.quicksettings.action.QS_TILE"/>
             </intent-filter>
         </service>
+
         <service
             android:name="com.aicp.device.HBMModeTileService"
             android:icon="@drawable/ic_hbm_tile"
@@ -91,5 +101,7 @@
                     android:name="android.service.quicksettings.action.QS_TILE"/>
             </intent-filter>
         </service>
+
     </application>
+
 </manifest>
