@@ -18,6 +18,7 @@
     <SwitchPreference
         android:key="off_screen_gesture_feedback"
         android:summary="@string/off_screen_gesture_feedback_summary_head"
+        android:icon="@drawable/ic_vibration"
         android:title="@string/off_screen_gesture_feedback_title_head"
         android:persistent="false" />
 
