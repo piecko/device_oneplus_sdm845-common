@@ -85,7 +85,6 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int GESTURE_II_SCANCODE = 251;
     private static final int GESTURE_LEFT_V_SCANCODE = 253;
     private static final int GESTURE_RIGHT_V_SCANCODE = 254;
-    private static final int GESTURE_A_SCANCODE = 255;
     private static final int GESTURE_RIGHT_SWIPE_SCANCODE = 63;
     private static final int GESTURE_LEFT_SWIPE_SCANCODE = 64;
     private static final int GESTURE_DOWN_SWIPE_SCANCODE = 65;
@@ -112,7 +111,6 @@ public class KeyHandler implements DeviceKeyHandler {
         GESTURE_II_SCANCODE,
         GESTURE_CIRCLE_SCANCODE,
         GESTURE_V_SCANCODE,
-        GESTURE_A_SCANCODE,
         GESTURE_LEFT_V_SCANCODE,
         GESTURE_RIGHT_V_SCANCODE,
         GESTURE_DOWN_SWIPE_SCANCODE,
@@ -129,7 +127,6 @@ public class KeyHandler implements DeviceKeyHandler {
         GESTURE_II_SCANCODE,
         GESTURE_CIRCLE_SCANCODE,
         GESTURE_V_SCANCODE,
-        GESTURE_A_SCANCODE,
         GESTURE_LEFT_V_SCANCODE,
         GESTURE_RIGHT_V_SCANCODE,
         GESTURE_DOWN_SWIPE_SCANCODE,
@@ -542,9 +539,6 @@ public class KeyHandler implements DeviceKeyHandler {
             case GESTURE_V_SCANCODE:
                 return Settings.System.getStringForUser(mContext.getContentResolver(),
                     GestureSettings.DEVICE_GESTURE_MAPPING_2, UserHandle.USER_CURRENT);
-            case GESTURE_A_SCANCODE:
-                return Settings.System.getStringForUser(mContext.getContentResolver(),
-                    GestureSettings.DEVICE_GESTURE_MAPPING_3, UserHandle.USER_CURRENT);
             case GESTURE_LEFT_V_SCANCODE:
                 return Settings.System.getStringForUser(mContext.getContentResolver(),
                     GestureSettings.DEVICE_GESTURE_MAPPING_4, UserHandle.USER_CURRENT);

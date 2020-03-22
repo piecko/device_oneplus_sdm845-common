@@ -113,11 +113,6 @@ public class Startup extends BroadcastReceiver {
         enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
         restore(getGestureFile(GestureSettings.KEY_DOWN_ARROW_APP), enabled);
 
-        // up arrow
-        value = Settings.System.getString(context.getContentResolver(), GestureSettings.DEVICE_GESTURE_MAPPING_3);
-        enabled = !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY);
-        restore(getGestureFile(GestureSettings.KEY_UP_ARROW_APP), enabled);
-
         // left arrow -> music prev
         mapping = GestureSettings.DEVICE_GESTURE_MAPPING_4;
         value = Settings.System.getString(context.getContentResolver(), mapping);

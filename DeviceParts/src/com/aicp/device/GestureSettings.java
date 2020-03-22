@@ -59,7 +59,6 @@ public class GestureSettings extends PreferenceFragment implements
     public static final String KEY_DOUBLE_SWIPE_APP = "double_swipe_gesture_app";
     public static final String KEY_CIRCLE_APP = "circle_gesture_app";
     public static final String KEY_DOWN_ARROW_APP = "down_arrow_gesture_app";
-    public static final String KEY_UP_ARROW_APP = "up_arrow_gesture_app";
     public static final String KEY_LEFT_ARROW_APP = "left_arrow_gesture_app";
     public static final String KEY_RIGHT_ARROW_APP = "right_arrow_gesture_app";
     public static final String KEY_DOWN_SWIPE_APP = "down_swipe_gesture_app";
@@ -72,7 +71,6 @@ public class GestureSettings extends PreferenceFragment implements
     public static final String DEVICE_GESTURE_MAPPING_0 = "device_gesture_mapping_0_0";
     public static final String DEVICE_GESTURE_MAPPING_1 = "device_gesture_mapping_1_0";
     public static final String DEVICE_GESTURE_MAPPING_2 = "device_gesture_mapping_2_0";
-    public static final String DEVICE_GESTURE_MAPPING_3 = "device_gesture_mapping_3_0";
     public static final String DEVICE_GESTURE_MAPPING_4 = "device_gesture_mapping_4_0";
     public static final String DEVICE_GESTURE_MAPPING_5 = "device_gesture_mapping_5_0";
     public static final String DEVICE_GESTURE_MAPPING_6 = "device_gesture_mapping_6_0";
@@ -85,7 +83,6 @@ public class GestureSettings extends PreferenceFragment implements
     private AppSelectListPreference mDoubleSwipeApp;
     private AppSelectListPreference mCircleApp;
     private AppSelectListPreference mDownArrowApp;
-    private AppSelectListPreference mUpArrowApp;
     private AppSelectListPreference mLeftArrowApp;
     private AppSelectListPreference mRightArrowApp;
     private AppSelectListPreference mDownSwipeApp;
@@ -126,12 +123,6 @@ public class GestureSettings extends PreferenceFragment implements
         value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_2);
         mDownArrowApp.setValue(value);
         mDownArrowApp.setOnPreferenceChangeListener(this);
-
-        mUpArrowApp = (AppSelectListPreference) findPreference(KEY_UP_ARROW_APP);
-        mUpArrowApp.setEnabled(isGestureSupported(KEY_UP_ARROW_APP));
-        value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_3);
-        mUpArrowApp.setValue(value);
-        mUpArrowApp.setOnPreferenceChangeListener(this);
 
         mLeftArrowApp = (AppSelectListPreference) findPreference(KEY_LEFT_ARROW_APP);
         mLeftArrowApp.setEnabled(isGestureSupported(KEY_LEFT_ARROW_APP));
@@ -204,11 +195,6 @@ public class GestureSettings extends PreferenceFragment implements
             boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
             setGestureEnabled(KEY_DOWN_ARROW_APP, !gestureDisabled);
             Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_2, value);
-        } else if (preference == mUpArrowApp) {
-            String value = (String) newValue;
-            boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
-            setGestureEnabled(KEY_UP_ARROW_APP, !gestureDisabled);
-            Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_3, value);
         } else if (preference == mLeftArrowApp) {
             String value = (String) newValue;
             boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
@@ -251,8 +237,6 @@ public class GestureSettings extends PreferenceFragment implements
                 return "/proc/touchpanel/double_swipe_enable";
             case KEY_DOWN_ARROW_APP:
                 return "/proc/touchpanel/down_arrow_enable";
-            case KEY_UP_ARROW_APP:
-                return "/proc/touchpanel/up_arrow_enable";
             case KEY_LEFT_ARROW_APP:
                 return "/proc/touchpanel/left_arrow_enable";
             case KEY_RIGHT_ARROW_APP:
@@ -338,7 +322,6 @@ public class GestureSettings extends PreferenceFragment implements
             mDoubleSwipeApp.setPackageList(mInstalledPackages);
             mCircleApp.setPackageList(mInstalledPackages);
             mDownArrowApp.setPackageList(mInstalledPackages);
-            mUpArrowApp.setPackageList(mInstalledPackages);
             mLeftArrowApp.setPackageList(mInstalledPackages);
             mRightArrowApp.setPackageList(mInstalledPackages);
             mDownSwipeApp.setPackageList(mInstalledPackages);
