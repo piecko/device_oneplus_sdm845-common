@@ -92,6 +92,21 @@ public class Startup extends BroadcastReceiver {
         enabled = !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY);
         restore(getGestureFile(GestureSettings.KEY_RIGHT_SWIPE_APP), enabled);
 
+        // M Gesture
+        value = Settings.System.getString(context.getContentResolver(), GestureSettings.DEVICE_GESTURE_MAPPING_3);
+        enabled = !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY);
+        restore(getGestureFile(GestureSettings.KEY_M_GESTURE_APP), enabled);
+
+        // S Gesture
+        value = Settings.System.getString(context.getContentResolver(), GestureSettings.DEVICE_GESTURE_MAPPING_4);
+        enabled = !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY);
+        restore(getGestureFile(GestureSettings.KEY_S_GESTURE_APP), enabled);
+
+        // W Gesture
+        value = Settings.System.getString(context.getContentResolver(), GestureSettings.DEVICE_GESTURE_MAPPING_5);
+        enabled = !TextUtils.isEmpty(value) && !value.equals(AppSelectListPreference.DISABLED_ENTRY);
+        restore(getGestureFile(GestureSettings.KEY_W_GESTURE_APP), enabled);
+
         enabled = Settings.System.getInt(context.getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0) != 0;
         restore(SRGBModeSwitch.getFile(), enabled);
 

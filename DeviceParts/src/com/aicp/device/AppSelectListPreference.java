@@ -216,7 +216,7 @@ public class AppSelectListPreference extends CustomDialogPreference {
                 R.drawable.ic_flashlight, TORCH_ENTRY);
         mInstalledPackages.add(0, torchItem);
 
-	PackageItem ambientDisplay = new PackageItem(getContext().getResources().getString(R.string.ambient_display_entry),
+        PackageItem ambientDisplay = new PackageItem(getContext().getResources().getString(R.string.ambient_display_entry),
                 R.drawable.ic_ambient_display, AMBIENT_DISPLAY_ENTRY);
         mInstalledPackages.add(0, ambientDisplay);
 
