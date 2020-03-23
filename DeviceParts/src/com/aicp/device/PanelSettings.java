@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2018 The OmniROM Project
+* Copyright (C) 2020 The Android Ice Cold Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -74,34 +75,39 @@ public class PanelSettings extends PreferenceFragment implements RadioGroup.OnCh
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
-        if (checkedId == R.id.srgb_mode) {
-            Utils.writeValue(DCIModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(WideModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(SRGBModeSwitch.getFile(), "1");
-            Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 1);
-        } else if (checkedId == R.id.dci_mode) {
-            Utils.writeValue(DCIModeSwitch.getFile(), "1");
-            Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 1);
-            Utils.writeValue(WideModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(SRGBModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
-        } else if (checkedId == R.id.wide_mode) {
-            Utils.writeValue(DCIModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(WideModeSwitch.getFile(), "1");
-            Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 1);;
-            Utils.writeValue(SRGBModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
-        } else if (checkedId == R.id.off_mode) {
-            Utils.writeValue(DCIModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(WideModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
-            Utils.writeValue(SRGBModeSwitch.getFile(), "0");
-            Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
+        switch (checkedId) {
+            case R.id.srgb_mode:
+                Utils.writeValue(DCIModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(WideModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(SRGBModeSwitch.getFile(), "1");
+                Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 1);
+                break;
+            case R.id.dci_mode:
+                Utils.writeValue(DCIModeSwitch.getFile(), "1");
+                Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 1);
+                Utils.writeValue(WideModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(SRGBModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
+                break;
+            case R.id.wide_mode:
+                Utils.writeValue(DCIModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(WideModeSwitch.getFile(), "1");
+                Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 1);;
+                Utils.writeValue(SRGBModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
+                break;
+            case R.id.off_mode:
+                Utils.writeValue(DCIModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(WideModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0);
+                Utils.writeValue(SRGBModeSwitch.getFile(), "0");
+                Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0);
+                break;
         }
     }
 }

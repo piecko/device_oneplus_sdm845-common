@@ -465,43 +465,51 @@ public class KeyHandler implements DeviceKeyHandler {
     private void doHandleSliderAction(int position) {
         int action = getSliderAction(position);
         int positionValue = 0;
-        if (action == 0) {
-            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-            mTorchState = false;
-            positionValue = MODE_RING;
-        } else if (action == 1) {
-            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
-            mTorchState = false;
-            positionValue = MODE_VIBRATE;
-        } else if (action == 2) {
-            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
-            mTorchState = false;
-            positionValue = MODE_SILENT;
-        } else if (action == 3) {
-            mNoMan.setZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-            mTorchState = false;
-            positionValue = MODE_PRIORITY_ONLY;
-        } else if (action == 4) {
-            mNoMan.setZenMode(ZEN_MODE_ALARMS, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-            mTorchState = false;
-            positionValue = MODE_ALARMS_ONLY;
-        } else if (action == 5) {
-            mNoMan.setZenMode(ZEN_MODE_NO_INTERRUPTIONS, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-            mTorchState = false;
-            positionValue = MODE_TOTAL_SILENCE;
-        } else if (action == 6) {
-            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
-            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-            positionValue = MODE_RING;
-            mUseSliderTorch = true;
-            mTorchState = true;
-        }
+        switch (action) {
+	    case 0:
+                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+                mTorchState = false;
+                positionValue = MODE_RING;
+                break;
+            case 1:
+                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
+                mTorchState = false;
+                positionValue = MODE_VIBRATE;
+                break;
+            case 2:
+                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
+                mTorchState = false;
+                positionValue = MODE_SILENT;
+                break;
+            case 3:
+                mNoMan.setZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+                mTorchState = false;
+                positionValue = MODE_PRIORITY_ONLY;
+                break;
+            case 4:
+                mNoMan.setZenMode(ZEN_MODE_ALARMS, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+                mTorchState = false;
+                positionValue = MODE_ALARMS_ONLY;
+                break;
+            case 5:
+                mNoMan.setZenMode(ZEN_MODE_NO_INTERRUPTIONS, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+                mTorchState = false;
+                positionValue = MODE_TOTAL_SILENCE;
+                break;
+            case 6:
+                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
+                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
+                positionValue = MODE_RING;
+                mUseSliderTorch = true;
+                mTorchState = true;
+                break;
+	}
 
         if (positionValue != 0) {
             sendUpdateBroadcast(position, positionValue);

@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2017 The OmniROM Project
+* Copyright (C) 2020 The Android Ice Cold Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -277,28 +278,33 @@ public class AppSelectListPreference extends CustomDialogPreference {
 
         if (name != null) {
             mAppIconDrawable = null;
-            if (name.equals(DISABLED_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.disabled_entry);
-                mAppIconResourceId = R.drawable.ic_disabled;
-            } else if (name.equals(TORCH_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.torch_entry);
-                mAppIconResourceId = R.drawable.ic_flashlight;
-            } else if (name.equals(CAMERA_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.camera_entry);
-                mAppIconResourceId = R.drawable.ic_camera;
-            } else if (name.equals(AMBIENT_DISPLAY_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.ambient_display_entry);
-                mAppIconResourceId = R.drawable.ic_ambient_display;
-            } else {
-                ComponentName componentName = ComponentName.unflattenFromString(name);
-                PackageItem item = mAdapter.resolveApplication(componentName);
-                if (item != null) {
-                    mTitle = item.mTitle;
-                    mAppIconDrawable = resolveAppIcon(item);
-                } else {
-                    mTitle = getContext().getResources().getString(R.string.resolve_failed_summary);
-                }
-            }
+	    switch (name) {
+                case DISABLED_ENTRY:
+                    mTitle = getContext().getResources().getString(R.string.disabled_entry);
+                    mAppIconResourceId = R.drawable.ic_disabled;
+                    break;
+                case TORCH_ENTRY:
+                    mTitle = getContext().getResources().getString(R.string.torch_entry);
+                    mAppIconResourceId = R.drawable.ic_flashlight;
+                    break;
+                case CAMERA_ENTRY:
+                    mTitle = getContext().getResources().getString(R.string.camera_entry);
+                    mAppIconResourceId = R.drawable.ic_camera;
+                    break;
+                case AMBIENT_DISPLAY_ENTRY:
+                    mTitle = getContext().getResources().getString(R.string.ambient_display_entry);
+                    mAppIconResourceId = R.drawable.ic_ambient_display;
+                    break;
+                default:
+                    ComponentName componentName = ComponentName.unflattenFromString(name);
+                    PackageItem item = mAdapter.resolveApplication(componentName);
+                    if (item != null) {
+                        mTitle = item.mTitle;
+                        mAppIconDrawable = resolveAppIcon(item);
+                    } else {
+                        mTitle = getContext().getResources().getString(R.string.resolve_failed_summary);
+                    }
+	    }
         } else {
             mTitle = getContext().getResources().getString(R.string.disabled_entry);
             mAppIconResourceId = R.drawable.ic_disabled;
