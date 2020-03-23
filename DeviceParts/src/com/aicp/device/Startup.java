@@ -24,6 +24,8 @@ import android.content.SharedPreferences;
 import androidx.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import static com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME;
+import com.aicp.device.GestureSettings;
 
 public class Startup extends BroadcastReceiver {
     private static void restore(String file, boolean enabled) {
@@ -83,24 +85,20 @@ public class Startup extends BroadcastReceiver {
     }
 
     public static void restoreAfterUserSwitch(Context context) {
-        // double swipe -> music play
-        String mapping = GestureSettings.DEVICE_GESTURE_MAPPING_0;
-        String value = Settings.System.getString(context.getContentResolver(), mapping);
-        if (TextUtils.isEmpty(value)) {
-            value = AppSelectListPreference.MUSIC_PLAY_ENTRY;
-            Settings.System.putString(context.getContentResolver(), mapping, value);
-        }
-        boolean enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
-        restore(getGestureFile(GestureSettings.KEY_DOUBLE_SWIPE_APP), enabled);
+
+        // music playback
+        final boolean musicPlaybackEnabled = Settings.System.getInt(context.getContentResolver(),
+                "Settings.System."+com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 0) == 1;
+        GestureSettings.setMusicPlaybackGestureEnabled(musicPlaybackEnabled);
 
         // circle -> camera
-        mapping = GestureSettings.DEVICE_GESTURE_MAPPING_1;
-        value = Settings.System.getString(context.getContentResolver(), mapping);
+        String mapping = GestureSettings.DEVICE_GESTURE_MAPPING_1;
+        String value = Settings.System.getString(context.getContentResolver(), mapping);
         if (TextUtils.isEmpty(value)) {
             value = AppSelectListPreference.CAMERA_ENTRY;
             Settings.System.putString(context.getContentResolver(), mapping, value);
         }
-        enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
+        boolean enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
         restore(getGestureFile(GestureSettings.KEY_CIRCLE_APP), enabled);
 
         // down arrow -> flashlight
@@ -112,26 +110,6 @@ public class Startup extends BroadcastReceiver {
         }
         enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
         restore(getGestureFile(GestureSettings.KEY_DOWN_ARROW_APP), enabled);
-
-        // left arrow -> music prev
-        mapping = GestureSettings.DEVICE_GESTURE_MAPPING_4;
-        value = Settings.System.getString(context.getContentResolver(), mapping);
-        if (TextUtils.isEmpty(value)) {
-            value = AppSelectListPreference.MUSIC_PREV_ENTRY;
-            Settings.System.putString(context.getContentResolver(), mapping, value);
-        }
-        enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
-        restore(getGestureFile(GestureSettings.KEY_LEFT_ARROW_APP), enabled);
-
-        // right arrow -> music next
-        mapping = GestureSettings.DEVICE_GESTURE_MAPPING_5;
-        value = Settings.System.getString(context.getContentResolver(), mapping);
-        if (TextUtils.isEmpty(value)) {
-            value = AppSelectListPreference.MUSIC_NEXT_ENTRY;
-            Settings.System.putString(context.getContentResolver(), mapping, value);
-        }
-        enabled = !value.equals(AppSelectListPreference.DISABLED_ENTRY);
-        restore(getGestureFile(GestureSettings.KEY_RIGHT_ARROW_APP), enabled);
 
         // down swipe
         value = Settings.System.getString(context.getContentResolver(), GestureSettings.DEVICE_GESTURE_MAPPING_6);

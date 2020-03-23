@@ -22,6 +22,13 @@
         android:title="@string/off_screen_gesture_feedback_title_head"
         android:persistent="false" />
 
+    <SwitchPreference
+        android:key="music_playback_gesture"
+        android:summary="@string/music_play_gesture_summary_head"
+        android:icon="@drawable/ic_music_play"
+        android:title="@string/music_play_gesture_title_head"
+        android:persistent="false" />
+
     <PreferenceCategory
         android:title="@string/offscreen_gesture_title">
 
@@ -29,22 +36,6 @@
             android:key="circle_gesture_app"
             android:title="@string/category_circle_gesture"
             android:persistent="false" />
-
-        <com.aicp.device.AppSelectListPreference
-            android:key="double_swipe_gesture_app"
-            android:title="@string/category_double_swipe_gesture"
-            android:persistent="false" />
-
-        <com.aicp.device.AppSelectListPreference
-            android:key="left_arrow_gesture_app"
-            android:title="@string/category_left_arrow_gesture"
-            android:persistent="false"/>
-
-        <com.aicp.device.AppSelectListPreference
-            android:key="right_arrow_gesture_app"
-            android:title="@string/category_right_arrow_gesture"
-            android:persistent="false"/>
-
         <!--
 	<com.aicp.device.AppSelectListPreference
             android:key="gesture_m_app"

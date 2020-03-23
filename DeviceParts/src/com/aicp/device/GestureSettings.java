@@ -46,6 +46,7 @@ import android.util.Log;
 import static android.provider.Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED;
 import android.os.UserHandle;
 import static com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME;
+import static com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -54,13 +55,14 @@ import java.util.List;
 public class GestureSettings extends PreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+    public static final String TAG = "GestureSettings";
     public static final String KEY_PROXI_SWITCH = "proxi";
     public static final String KEY_OFF_SCREEN_GESTURE_FEEDBACK_SWITCH = "off_screen_gesture_feedback";
-    public static final String KEY_DOUBLE_SWIPE_APP = "double_swipe_gesture_app";
+    public static final String KEY_MUSIC_START = "music_playback_gesture";
     public static final String KEY_CIRCLE_APP = "circle_gesture_app";
     public static final String KEY_DOWN_ARROW_APP = "down_arrow_gesture_app";
-    public static final String KEY_LEFT_ARROW_APP = "left_arrow_gesture_app";
-    public static final String KEY_RIGHT_ARROW_APP = "right_arrow_gesture_app";
+    public static final String KEY_MUSIC_TRACK_PREV = "left_arrow_gesture_app";
+    public static final String KEY_MUSIC_TRACK_NEXT = "right_arrow_gesture_app";
     public static final String KEY_DOWN_SWIPE_APP = "down_swipe_gesture_app";
     public static final String KEY_UP_SWIPE_APP = "up_swipe_gesture_app";
     public static final String KEY_LEFT_SWIPE_APP = "left_swipe_gesture_app";
@@ -68,17 +70,14 @@ public class GestureSettings extends PreferenceFragment implements
     public static final String KEY_FP_GESTURE_CATEGORY = "key_fp_gesture_category";
     public static final String KEY_FP_GESTURE_DEFAULT_CATEGORY = "gesture_settings";
 
-    public static final String DEVICE_GESTURE_MAPPING_0 = "device_gesture_mapping_0_0";
     public static final String DEVICE_GESTURE_MAPPING_1 = "device_gesture_mapping_1_0";
     public static final String DEVICE_GESTURE_MAPPING_2 = "device_gesture_mapping_2_0";
-    public static final String DEVICE_GESTURE_MAPPING_4 = "device_gesture_mapping_4_0";
-    public static final String DEVICE_GESTURE_MAPPING_5 = "device_gesture_mapping_5_0";
     public static final String DEVICE_GESTURE_MAPPING_6 = "device_gesture_mapping_6_0";
     public static final String DEVICE_GESTURE_MAPPING_7 = "device_gesture_mapping_7_0";
     public static final String DEVICE_GESTURE_MAPPING_8 = "device_gesture_mapping_8_0";
     public static final String DEVICE_GESTURE_MAPPING_9 = "device_gesture_mapping_9_0";
 
-    private TwoStatePreference mFpSwipeDownSwitch;
+    private TwoStatePreference mMusicPlaybackGestureSwitch;
     private TwoStatePreference mOffscreenGestureFeedbackSwitch;
     private AppSelectListPreference mDoubleSwipeApp;
     private AppSelectListPreference mCircleApp;
@@ -97,6 +96,7 @@ public class GestureSettings extends PreferenceFragment implements
     private List<AppSelectListPreference.PackageItem> mInstalledPackages = new LinkedList<AppSelectListPreference.PackageItem>();
     private PackageManager mPm;
 
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.gesture_settings, rootKey);
@@ -106,15 +106,17 @@ public class GestureSettings extends PreferenceFragment implements
         mOffscreenGestureFeedbackSwitch.setChecked(Settings.System.getInt(getContext().getContentResolver(),
                 "Settings.System."+com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, 1) != 0);
 
-        mDoubleSwipeApp = (AppSelectListPreference) findPreference(KEY_DOUBLE_SWIPE_APP);
-        mDoubleSwipeApp.setEnabled(isGestureSupported(KEY_DOUBLE_SWIPE_APP));
-        String value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_0);
-        mDoubleSwipeApp.setValue(value);
-        mDoubleSwipeApp.setOnPreferenceChangeListener(this);
+        mMusicPlaybackGestureSwitch = (TwoStatePreference) findPreference(KEY_MUSIC_START);
+        mMusicPlaybackGestureSwitch.setChecked(Settings.System.getInt(getContext().getContentResolver(),
+                "Settings.System."+com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 1) != 0);
+
+        final boolean musicPlaybackEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                "Settings.System."+GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 0, UserHandle.USER_CURRENT) == 1;
+        setMusicPlaybackGestureEnabled(musicPlaybackEnabled);
 
         mCircleApp = (AppSelectListPreference) findPreference(KEY_CIRCLE_APP);
         mCircleApp.setEnabled(isGestureSupported(KEY_CIRCLE_APP));
-        value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_1);
+        String value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_1);
         mCircleApp.setValue(value);
         mCircleApp.setOnPreferenceChangeListener(this);
 
@@ -123,18 +125,6 @@ public class GestureSettings extends PreferenceFragment implements
         value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_2);
         mDownArrowApp.setValue(value);
         mDownArrowApp.setOnPreferenceChangeListener(this);
-
-        mLeftArrowApp = (AppSelectListPreference) findPreference(KEY_LEFT_ARROW_APP);
-        mLeftArrowApp.setEnabled(isGestureSupported(KEY_LEFT_ARROW_APP));
-        value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_4);
-        mLeftArrowApp.setValue(value);
-        mLeftArrowApp.setOnPreferenceChangeListener(this);
-
-        mRightArrowApp = (AppSelectListPreference) findPreference(KEY_RIGHT_ARROW_APP);
-        mRightArrowApp.setEnabled(isGestureSupported(KEY_RIGHT_ARROW_APP));
-        value = Settings.System.getString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_5);
-        mRightArrowApp.setValue(value);
-        mRightArrowApp.setOnPreferenceChangeListener(this);
 
         mDownSwipeApp = (AppSelectListPreference) findPreference(KEY_DOWN_SWIPE_APP);
         mDownSwipeApp.setEnabled(isGestureSupported(KEY_DOWN_SWIPE_APP));
@@ -175,17 +165,18 @@ public class GestureSettings extends PreferenceFragment implements
                     "Settings.System."+com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, mOffscreenGestureFeedbackSwitch.isChecked() ? 1 : 0);
             return true;
         }
+       if (preference == mMusicPlaybackGestureSwitch) {
+            Settings.System.putInt(getContext().getContentResolver(),
+                    "Settings.System."+com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, mMusicPlaybackGestureSwitch.isChecked() ? 1 : 0);
+            setMusicPlaybackGestureEnabled(mMusicPlaybackGestureSwitch.isChecked());
+            return true;
+        }
         return super.onPreferenceTreeClick(preference);
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mDoubleSwipeApp) {
-            String value = (String) newValue;
-            boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
-            setGestureEnabled(KEY_DOUBLE_SWIPE_APP, !gestureDisabled);
-            Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_0, value);
-        } else if (preference == mCircleApp) {
+        if (preference == mCircleApp) {
             String value = (String) newValue;
             boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
             setGestureEnabled(KEY_CIRCLE_APP, !gestureDisabled);
@@ -195,16 +186,6 @@ public class GestureSettings extends PreferenceFragment implements
             boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
             setGestureEnabled(KEY_DOWN_ARROW_APP, !gestureDisabled);
             Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_2, value);
-        } else if (preference == mLeftArrowApp) {
-            String value = (String) newValue;
-            boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
-            setGestureEnabled(KEY_LEFT_ARROW_APP, !gestureDisabled);
-            Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_4, value);
-        } else if (preference == mRightArrowApp) {
-            String value = (String) newValue;
-            boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
-            setGestureEnabled(KEY_RIGHT_ARROW_APP, !gestureDisabled);
-            Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_5, value);
         } else if (preference == mDownSwipeApp) {
             String value = (String) newValue;
             boolean gestureDisabled = value.equals(AppSelectListPreference.DISABLED_ENTRY);
@@ -226,6 +207,7 @@ public class GestureSettings extends PreferenceFragment implements
             setGestureEnabled(KEY_RIGHT_SWIPE_APP, !gestureDisabled);
             Settings.System.putString(getContext().getContentResolver(), DEVICE_GESTURE_MAPPING_9, value);
         }
+
         return true;
     }
 
@@ -233,13 +215,13 @@ public class GestureSettings extends PreferenceFragment implements
         switch(key) {
             case KEY_CIRCLE_APP:
                 return "/proc/touchpanel/letter_o_enable";
-            case KEY_DOUBLE_SWIPE_APP:
+            case KEY_MUSIC_START:
                 return "/proc/touchpanel/double_swipe_enable";
             case KEY_DOWN_ARROW_APP:
                 return "/proc/touchpanel/down_arrow_enable";
-            case KEY_LEFT_ARROW_APP:
+            case KEY_MUSIC_TRACK_PREV:
                 return "/proc/touchpanel/left_arrow_enable";
-            case KEY_RIGHT_ARROW_APP:
+            case KEY_MUSIC_TRACK_NEXT:
                 return "/proc/touchpanel/right_arrow_enable";
             case KEY_DOWN_SWIPE_APP:
                 return "/proc/touchpanel/down_swipe_enable";
@@ -253,11 +235,32 @@ public class GestureSettings extends PreferenceFragment implements
         return null;
     }
 
-    private boolean isGestureSupported(String key) {
+    public static void setMusicPlaybackGestureEnabled(boolean enabled) {
+
+        boolean musicPlaybackSupported = isGestureSupported(KEY_MUSIC_START);
+        boolean musicNextTrackSupported = isGestureSupported(KEY_MUSIC_TRACK_NEXT);
+        boolean musicPrevTrackSupported = isGestureSupported(KEY_MUSIC_TRACK_PREV);
+
+        if (musicPlaybackSupported && musicNextTrackSupported && musicPrevTrackSupported) {
+            if (enabled) {
+                setGestureEnabled(KEY_MUSIC_START, musicPlaybackSupported);
+                setGestureEnabled(KEY_MUSIC_TRACK_NEXT, musicNextTrackSupported);
+                setGestureEnabled(KEY_MUSIC_TRACK_PREV, musicPrevTrackSupported);
+            } else {
+                setGestureEnabled(KEY_MUSIC_START, false);
+                setGestureEnabled(KEY_MUSIC_TRACK_NEXT, false);
+                setGestureEnabled(KEY_MUSIC_TRACK_PREV, false);
+            }
+        } else {
+            Log.e(TAG,"music playback gesture files are not writeable!");
+        }
+    }
+
+    private static boolean isGestureSupported(String key) {
         return Utils.fileWritable(getGestureFile(key));
     }
 
-    private void setGestureEnabled(String key, boolean enabled) {
+    private static void setGestureEnabled(String key, boolean enabled) {
         Utils.writeValue(getGestureFile(key), enabled ? "1" : "0");
     }
 
@@ -319,11 +322,8 @@ public class GestureSettings extends PreferenceFragment implements
 
         @Override
         protected void onPostExecute(Void feed) {
-            mDoubleSwipeApp.setPackageList(mInstalledPackages);
             mCircleApp.setPackageList(mInstalledPackages);
             mDownArrowApp.setPackageList(mInstalledPackages);
-            mLeftArrowApp.setPackageList(mInstalledPackages);
-            mRightArrowApp.setPackageList(mInstalledPackages);
             mDownSwipeApp.setPackageList(mInstalledPackages);
             mUpSwipeApp.setPackageList(mInstalledPackages);
             mLeftSwipeApp.setPackageList(mInstalledPackages);

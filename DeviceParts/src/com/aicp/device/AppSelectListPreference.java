@@ -215,18 +215,6 @@ public class AppSelectListPreference extends CustomDialogPreference {
                 R.drawable.ic_flashlight, TORCH_ENTRY);
         mInstalledPackages.add(0, torchItem);
 
-        PackageItem musicNextItem = new PackageItem(getContext().getResources().getString(R.string.music_next_entry),
-                R.drawable.ic_music_next, MUSIC_NEXT_ENTRY);
-        mInstalledPackages.add(0, musicNextItem);
-
-        PackageItem musicPrevItem = new PackageItem(getContext().getResources().getString(R.string.music_prev_entry),
-                R.drawable.ic_music_prev, MUSIC_PREV_ENTRY);
-        mInstalledPackages.add(0, musicPrevItem);
-
-        PackageItem musicPlayItem = new PackageItem(getContext().getResources().getString(R.string.music_play_entry),
-                R.drawable.ic_music_play, MUSIC_PLAY_ENTRY);
-        mInstalledPackages.add(0, musicPlayItem);
-
 	PackageItem ambientDisplay = new PackageItem(getContext().getResources().getString(R.string.ambient_display_entry),
                 R.drawable.ic_ambient_display, AMBIENT_DISPLAY_ENTRY);
         mInstalledPackages.add(0, ambientDisplay);
@@ -298,18 +286,9 @@ public class AppSelectListPreference extends CustomDialogPreference {
             } else if (name.equals(CAMERA_ENTRY)) {
                 mTitle = getContext().getResources().getString(R.string.camera_entry);
                 mAppIconResourceId = R.drawable.ic_camera;
-            } else if (name.equals(MUSIC_PLAY_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.music_play_entry);
-                mAppIconResourceId = R.drawable.ic_music_play;
-            } else if (name.equals(MUSIC_NEXT_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.music_next_entry);
-                mAppIconResourceId = R.drawable.ic_music_next;
             } else if (name.equals(AMBIENT_DISPLAY_ENTRY)) {
                 mTitle = getContext().getResources().getString(R.string.ambient_display_entry);
                 mAppIconResourceId = R.drawable.ic_ambient_display;
-            } else if (name.equals(MUSIC_PREV_ENTRY)) {
-                mTitle = getContext().getResources().getString(R.string.music_prev_entry);
-                mAppIconResourceId = R.drawable.ic_music_prev;
             } else {
                 ComponentName componentName = ComponentName.unflattenFromString(name);
                 PackageItem item = mAdapter.resolveApplication(componentName);
