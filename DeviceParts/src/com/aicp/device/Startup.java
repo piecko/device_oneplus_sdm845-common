@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2013 The OmniROM Project
+* Copyright (C) 2020 The Android Ice Cold Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -35,52 +36,12 @@ public class Startup extends BroadcastReceiver {
         Utils.writeValue(file, enabled ? "1" : "0");
     }
 
-    private static void restore(String file, String value) {
-        if (file == null) {
-            return;
-        }
-        Utils.writeValue(file, value);
-    }
-
     private static String getGestureFile(String key) {
         return GestureSettings.getGestureFile(key);
     }
 
-    private void maybeImportOldSettings(Context context) {
-        boolean imported = Settings.System.getInt(context.getContentResolver(), "omni_device_setting_imported", 0) != 0;
-        if (!imported) {
-            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_SRGB_SWITCH, false);
-            Settings.System.putInt(context.getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
-
-            enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_HBM_SWITCH, false);
-            Settings.System.putInt(context.getContentResolver(), HBMModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
-
-            enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_DCD_SWITCH, false);
-            Settings.System.putInt(context.getContentResolver(), DCDModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
-
-            enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_DCI_SWITCH, false);
-            Settings.System.putInt(context.getContentResolver(), DCIModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
-
-            enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_WIDE_SWITCH, false);
-            Settings.System.putInt(context.getContentResolver(), WideModeSwitch.SETTINGS_KEY, enabled ? 1 : 0);
-
-            String vibrSystemStrength = sharedPrefs.getString(DeviceSettings.KEY_SYSTEM_VIBSTRENGTH, VibratorSystemStrengthPreference.DEFAULT_VALUE);
-            Settings.System.putString(context.getContentResolver(), VibratorSystemStrengthPreference.SETTINGS_KEY, vibrSystemStrength);
-
-            String vibrCallStrength = sharedPrefs.getString(DeviceSettings.KEY_CALL_VIBSTRENGTH, VibratorCallStrengthPreference.DEFAULT_VALUE);
-            Settings.System.putString(context.getContentResolver(), VibratorCallStrengthPreference.SETTINGS_KEY, vibrCallStrength);
-
-            String vibrNotifStrength = sharedPrefs.getString(DeviceSettings.KEY_NOTIF_VIBSTRENGTH, VibratorNotifStrengthPreference.DEFAULT_VALUE);
-            Settings.System.putString(context.getContentResolver(), VibratorNotifStrengthPreference.SETTINGS_KEY, vibrNotifStrength);
-
-            Settings.System.putInt(context.getContentResolver(), "omni_device_setting_imported", 1);
-        }
-    }
-
     @Override
     public void onReceive(final Context context, final Intent bootintent) {
-        maybeImportOldSettings(context);
         restoreAfterUserSwitch(context);
     }
 
