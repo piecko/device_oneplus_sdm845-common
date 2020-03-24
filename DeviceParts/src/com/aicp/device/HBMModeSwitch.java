@@ -33,9 +33,13 @@ public class HBMModeSwitch implements OnPreferenceChangeListener {
     public static final String SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_HBM_SWITCH;
 
     private Context mContext;
+    private String mHBMOffState;
+    private String mHBMOnState;
 
     public HBMModeSwitch(Context context) {
         mContext = context;
+        mHBMOffState = context.getResources().getString(R.string.hbmOFF);
+        mHBMOnState = context.getResources().getString(R.string.hbmON);
     }
 
     public static String getFile() {
@@ -57,7 +61,7 @@ public class HBMModeSwitch implements OnPreferenceChangeListener {
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         Boolean enabled = (Boolean) newValue;
         Settings.System.putInt(mContext.getContentResolver(), SETTINGS_KEY, enabled ? 1 : 0);
-        Utils.writeValue(getFile(), enabled ? "1" : "0");
+        Utils.writeValue(getFile(), enabled ? mHBMOnState : mHBMOffState);
         return true;
     }
 }

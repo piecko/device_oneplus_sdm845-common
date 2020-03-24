@@ -19,4 +19,6 @@
 
     <bool name="config_device_has_hw_nav_buttons">false</bool>
 
+    <string name="hbmOFF">"0"</string>
+    <string name="hbmON">"1"</string>
 </resources>
