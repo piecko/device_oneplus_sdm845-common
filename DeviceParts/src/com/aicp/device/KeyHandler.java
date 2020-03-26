@@ -131,6 +131,7 @@ public class KeyHandler implements DeviceKeyHandler {
     public static final int MODE_RING = 605;
     // AICP additions: arbitrary value which hopefully doesn't conflict with upstream anytime soon
     public static final int MODE_SILENT = 620;
+    public static final int MODE_FLASHLIGHT = 621;
 
     private static final int[] sSupportedGestures = new int[]{
         GESTURE_II_SCANCODE,
@@ -413,7 +414,7 @@ public class KeyHandler implements DeviceKeyHandler {
             case 6:
                 mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG);
                 mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-                positionValue = MODE_RING;
+                positionValue = MODE_FLASHLIGHT;
                 mUseSliderTorch = true;
                 mTorchState = true;
                 break;
