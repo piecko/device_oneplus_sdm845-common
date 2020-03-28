@@ -19,17 +19,24 @@ package com.aicp.device;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.provider.Settings;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceManager;
 
 import com.aicp.device.DeviceSettings;
 
-public class SRGBModeSwitch {
+public class SRGBModeSwitch implements OnPreferenceChangeListener {
 
     private static final String FILE = "/sys/devices/platform/soc/ae00000.qcom,mdss_mdp/drm/card0/card0-DSI-1/native_display_srgb_color_mode";
 
     public static final String SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_SRGB_SWITCH;
+
+    private Context mContext;
+
+    public SRGBModeSwitch(Context context) {
+        mContext = context;
+    }
 
     public static String getFile() {
         if (Utils.fileWritable(FILE)) {
@@ -44,5 +51,13 @@ public class SRGBModeSwitch {
 
     public static boolean isCurrentlyEnabled(Context context) {
         return Utils.getFileValueAsBoolean(getFile(), false);
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        Boolean enabled = (Boolean) newValue;
+        Settings.System.putInt(mContext.getContentResolver(), SETTINGS_KEY, enabled ? 1 : 0);
+        Utils.writeValue(getFile(), enabled ? "1" : "0");
+        return true;
     }
 }
