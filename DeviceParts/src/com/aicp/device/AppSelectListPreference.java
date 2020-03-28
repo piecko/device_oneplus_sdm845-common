@@ -60,13 +60,6 @@ public class AppSelectListPreference extends CustomDialogPreference {
     public static final String MUSIC_PREV_ENTRY = "music_prev";
     public static final String MUSIC_NEXT_ENTRY = "music_next";
     public static final String WAKE_ENTRY = "wake";
-    public static final String VOLUME_UP_ENTRY = "volume_up";
-    public static final String VOLUME_DOWN_ENTRY = "volume_down";
-    public static final String BROWSE_SCROLL_DOWN_ENTRY = "browse_scroll_down";
-    public static final String BROWSE_SCROLL_UP_ENTRY = "browse_scroll_up";
-    public static final String NAVIGATE_BACK_ENTRY = "navigate_back";
-    public static final String NAVIGATE_HOME_ENTRY = "navigate_home";
-    public static final String NAVIGATE_RECENT_ENTRY = "navigate_recent";
     public static final String AMBIENT_DISPLAY_ENTRY = "ambient_display";
 
     private AppSelectListAdapter mAdapter;
