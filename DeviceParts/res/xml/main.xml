@@ -83,6 +83,34 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/category_audio">
+        <com.aicp.device.EarpieceGainPreference
+            android:key="earpiece_gain"
+            android:title="@string/earpiece_gain_title"
+            android:icon="@drawable/ic_earpiece_gain"
+            android:summary="@string/earpiece_gain_summary"
+            android:persistent="false" />
+        <com.aicp.device.HeadphoneGainPreference
+            android:key="headphone_gain"
+            android:title="@string/headphone_gain_title"
+            android:icon="@drawable/ic_hp_gain"
+            android:summary="@string/headphone_gain_summary"
+            android:persistent="false" />
+        <com.aicp.device.MicGainPreference
+            android:key="mic_gain"
+            android:title="@string/mic_gain_title"
+            android:icon="@drawable/ic_mic_gain"
+            android:summary="@string/mic_gain_summary"
+            android:persistent="false" />
+        <com.aicp.device.SpeakerGainPreference
+            android:key="speaker_gain"
+            android:title="@string/speaker_gain_title"
+            android:icon="@drawable/ic_speaker_gain"
+            android:summary="@string/speaker_gain_summary"
+            android:persistent="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/category_vibrator">
         <com.aicp.device.VibratorSystemStrengthPreference
             android:key="vib_system_strength"

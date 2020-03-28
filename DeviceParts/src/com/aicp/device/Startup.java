@@ -27,7 +27,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import static com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME;
 import com.aicp.device.GestureSettings;
-
 public class Startup extends BroadcastReceiver {
     private static void restore(String file, boolean enabled) {
         if (file == null) {
@@ -125,5 +124,10 @@ public class Startup extends BroadcastReceiver {
         VibratorSystemStrengthPreference.restore(context);
         VibratorCallStrengthPreference.restore(context);
         VibratorNotifStrengthPreference.restore(context);
+
+	HeadphoneGainPreference.restore(context);
+	EarpieceGainPreference.restore(context);
+	MicGainPreference.restore(context);
+	SpeakerGainPreference.restore(context);
     }
 }
