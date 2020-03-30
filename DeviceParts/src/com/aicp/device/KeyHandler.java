@@ -64,7 +64,7 @@ import android.view.KeyEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.util.aicp.DeviceKeyHandler;
+import com.android.internal.util.aicp.CustomKeyHandler;
 import com.android.internal.util.aicp.PackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.aicp.AicpUtils;
@@ -72,7 +72,7 @@ import com.android.internal.util.aicp.AicpVibe;
 import com.android.internal.statusbar.IStatusBarService;
 
 
-public class KeyHandler implements DeviceKeyHandler {
+public class KeyHandler implements CustomKeyHandler {
 
     private static final String TAG = "KeyHandler";
     private static final boolean DEBUG = false;

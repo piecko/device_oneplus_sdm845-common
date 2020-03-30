@@ -51,6 +51,12 @@
     <!-- Set to true to add links to Cell Broadcast app from Settings and MMS app. -->
     <bool name="config_cellBroadcastAppLinks">true</bool>
 
+    <!-- Names of the key handler class -->
+    <string name="config_customKeyHandlerClass" translatable="false">com.aicp.device.KeyHandler</string>
+
+    <!-- Paths to the library that contain device specific key handler -->
+    <string name="config_customKeyHandlerLib" translatable="false">/system/priv-app/DeviceParts/DeviceParts.apk</string>
+
     <!-- Default list of files pinned by the Pinner Service -->
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
         <item>"/system/framework/arm64/boot-framework.oat"</item>
@@ -66,12 +72,6 @@
         <item>"/product/priv-app/SystemUI/oat/arm64/SystemUI.odex"</item>
         <item>"/system/lib64/libsurfaceflinger.so"</item>
     </string-array>
-
-    <!-- Names of the key handler class -->
-    <string name="config_deviceKeyHandlerClass" translatable="false">com.aicp.device.KeyHandler</string>
-
-    <!-- Paths to the library that contain device specific key handler -->
-    <string name="config_deviceKeyHandlerLib" translatable="false">/system/priv-app/DeviceParts/DeviceParts.apk</string>
 
     <!-- Flag specifying whether VoLTE is available on device -->
     <bool name="config_device_volte_available">true</bool>
