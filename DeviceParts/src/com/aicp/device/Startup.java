@@ -25,8 +25,7 @@ import android.content.SharedPreferences;
 import androidx.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import static com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME;
-import com.aicp.device.GestureSettings;
+
 public class Startup extends BroadcastReceiver {
     private static void restore(String file, boolean enabled) {
         if (file == null) {

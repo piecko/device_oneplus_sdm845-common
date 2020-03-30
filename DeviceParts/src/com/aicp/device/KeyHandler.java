@@ -70,9 +70,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.aicp.AicpUtils;
 import com.android.internal.util.aicp.AicpVibe;
 import com.android.internal.statusbar.IStatusBarService;
-import static com.aicp.device.AppSelectListPreference.MUSIC_PLAY_ENTRY;
-import static com.aicp.device.AppSelectListPreference.MUSIC_PREV_ENTRY;
-import static com.aicp.device.AppSelectListPreference.MUSIC_NEXT_ENTRY;
 
 
 public class KeyHandler implements DeviceKeyHandler {

@@ -45,8 +45,9 @@ import android.widget.ListView;
 import android.util.Log;
 import static android.provider.Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED;
 import android.os.UserHandle;
-import static com.aicp.device.KeyHandler.GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME;
 import static com.aicp.device.KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME;
+
+
 
 import java.util.Collections;
 import java.util.LinkedList;
