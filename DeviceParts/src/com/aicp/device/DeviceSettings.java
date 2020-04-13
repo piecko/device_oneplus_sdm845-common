@@ -56,7 +56,7 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String KEY_DCD_SWITCH = "dcd";
     public static final String KEY_DCI_SWITCH = "dci";
     public static final String KEY_WIDE_SWITCH = "wide";
-
+    public static final String KEY_BACKLIGHT_DIMMER = "backlight_dimmer";
     public static final String KEY_HEADPHONE_GAIN = "headphone_gain";
     public static final String KEY_EARPIECE_GAIN = "earpiece_gain";
     public static final String KEY_MIC_GAIN = "mic_gain";

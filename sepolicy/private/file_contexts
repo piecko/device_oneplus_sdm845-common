@@ -1,3 +1,6 @@
+# backlight dimmer
+/sys/module/msm_drm/parameters/backlight_min   u:object_r:sysfs_backlight_dimmer:s0
+
 # Data files
 /data/misc/display(/.*)?      u:object_r:display_misc_file:s0
 

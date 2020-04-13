@@ -39,6 +39,12 @@
                     android:targetPackage="com.aicp.device"
                     android:targetClass="com.aicp.device.PanelSettingsActivity" />
         </Preference>
+        <com.aicp.device.BacklightDimmerPreference
+            android:key="backlight_dimmer"
+            android:title="@string/backlight_dimmer_title"
+            android:icon="@drawable/ic_backlight_dimmer"
+            android:summary="@string/backlight_dimmer_summary"
+            android:persistent="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory

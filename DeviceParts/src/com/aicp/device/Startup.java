@@ -124,9 +124,11 @@ public class Startup extends BroadcastReceiver {
         VibratorCallStrengthPreference.restore(context);
         VibratorNotifStrengthPreference.restore(context);
 
-	HeadphoneGainPreference.restore(context);
-	EarpieceGainPreference.restore(context);
-	MicGainPreference.restore(context);
-	SpeakerGainPreference.restore(context);
+        BacklightDimmerPreference.restore(context);
+
+        HeadphoneGainPreference.restore(context);
+        EarpieceGainPreference.restore(context);
+        MicGainPreference.restore(context);
+        SpeakerGainPreference.restore(context);
     }
 }
