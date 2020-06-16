@@ -92,6 +92,9 @@ on boot
     chown system system /sys/module/msm_drm/parameters/backlight_min
     chmod 0666 /sys/module/msm_drm/parameters/backlight_min
 
+on property:sys.boot_completed=1
+    setprop sys.io.scheduler "cfq"
+
 on charger
     write /sys/class/backlight/panel0-backlight/brightness 150
 
