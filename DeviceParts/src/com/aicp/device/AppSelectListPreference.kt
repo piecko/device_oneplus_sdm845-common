@@ -29,10 +29,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import com.android.settingslib.CustomDialogPreference
+import androidx.core.content.res.ResourcesCompat
+import com.android.settingslib.CustomDialogPreferenceCompat
 import java.util.*
 
-class AppSelectListPreference : CustomDialogPreference {
+class AppSelectListPreference : CustomDialogPreferenceCompat {
     private var mAdapter: AppSelectListAdapter? = null
     private var mAppIconDrawable: Drawable? = null
     private var mAppIconResourceId = 0
@@ -62,7 +63,10 @@ class AppSelectListPreference : CustomDialogPreference {
         }
 
         override fun compareTo(another: PackageItem): Int {
-            return mTitle.toString().toUpperCase().compareTo(another.mTitle.toString().toUpperCase())
+            return mTitle.toString().toUpperCase(Locale.ROOT).compareTo(another.mTitle.toString().toUpperCase(
+                Locale.ROOT
+            )
+            )
         }
 
         override fun hashCode(): Int {
@@ -77,7 +81,7 @@ class AppSelectListPreference : CustomDialogPreference {
     }
 
     inner class AppSelectListAdapter(context: Context?) : BaseAdapter() {
-        private val mInflater: LayoutInflater
+        private val mInflater: LayoutInflater = LayoutInflater.from(context)
 
         override fun getCount(): Int {
             return mInstalledPackages.size
@@ -93,14 +97,13 @@ class AppSelectListPreference : CustomDialogPreference {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
             var convertView: View? = convertView
-            val holder: ViewHolder
-                convertView = mInflater.inflate(R.layout.applist_preference_icon, null, false)
-                holder = ViewHolder()
+            convertView = mInflater.inflate(R.layout.applist_preference_icon, null, false)
+            val holder: ViewHolder = ViewHolder()
                 convertView.setTag(holder)
                 holder.title = convertView.findViewById(R.id.title) as TextView
                 holder.icon = convertView.findViewById(R.id.icon) as ImageView
             val applicationInfo = getItem(position)
-            holder.title!!.setText(applicationInfo.mTitle)
+            holder.title!!.text = applicationInfo.mTitle
             if (applicationInfo.mAppIconResourceId != 0) {
                 holder.icon!!.setImageResource(applicationInfo.mAppIconResourceId)
             } else {
@@ -112,7 +115,7 @@ class AppSelectListPreference : CustomDialogPreference {
 
         fun resolveApplication(componentName: ComponentName): PackageItem? {
             for (item in mInstalledPackages) {
-                if (item.mComponentName != null && item.mComponentName.equals(componentName)) {
+                if (item.mComponentName != null && item.mComponentName == componentName) {
                     return item
                 }
             }
@@ -125,9 +128,6 @@ class AppSelectListPreference : CustomDialogPreference {
             var icon: ImageView? = null
         }
 
-        init {
-            mInflater = LayoutInflater.from(context)
-        }
     }
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
@@ -147,47 +147,51 @@ class AppSelectListPreference : CustomDialogPreference {
     }
 
     private fun init() {
-        mPm = getContext().getPackageManager()
-        setDialogLayoutResource(R.layout.preference_dialog_applist)
-        setLayoutResource(R.layout.preference_app_select)
+        mPm = context.packageManager
+        dialogLayoutResource = R.layout.preference_dialog_applist
+        layoutResource = R.layout.preference_app_select
         setNegativeButtonText(android.R.string.cancel)
-        setPositiveButtonText(null)
+        positiveButtonText = null
         setDialogTitle(R.string.choose_app)
-        setDialogIcon(null)
-        mAdapter = AppSelectListAdapter(getContext())
+        dialogIcon = null
+        mAdapter = AppSelectListAdapter(context)
     }
 
     private fun addSpecialApps() {
-        val cameraItem = PackageItem(getContext().getResources().getString(R.string.camera_entry),
+        val cameraItem = PackageItem(
+            context.resources.getString(R.string.camera_entry),
                 R.drawable.ic_camera, CAMERA_ENTRY)
         mInstalledPackages.add(0, cameraItem)
-        val torchItem = PackageItem(getContext().getResources().getString(R.string.torch_entry),
+        val torchItem = PackageItem(
+            context.resources.getString(R.string.torch_entry),
                 R.drawable.ic_flashlight, TORCH_ENTRY)
         mInstalledPackages.add(0, torchItem)
-        val ambientDisplay = PackageItem(getContext().getResources().getString(R.string.ambient_display_entry),
+        val ambientDisplay = PackageItem(
+            context.resources.getString(R.string.ambient_display_entry),
                 R.drawable.ic_ambient_display, AMBIENT_DISPLAY_ENTRY)
         mInstalledPackages.add(0, ambientDisplay)
-        val disabledItem = PackageItem(getContext().getResources().getString(R.string.disabled_entry),
+        val disabledItem = PackageItem(
+            context.resources.getString(R.string.disabled_entry),
                 R.drawable.ic_disabled, DISABLED_ENTRY)
         mInstalledPackages.add(0, disabledItem)
     }
 
-    override protected fun onSetInitialValue(restorePersistedValue: Boolean, defaultValue: Any?) {
-        super.onSetInitialValue(restorePersistedValue, defaultValue)
-        if (mTitle != null) {
-            setSummary(mTitle)
+    override fun onSetInitialValue(restorePersistedValue: Boolean, defaultValue: Any?) {
+        super.onSetInitialValue(defaultValue)
+        summary = if (mTitle != null) {
+            mTitle
         } else {
-            setSummary(getContext().getResources().getString(R.string.not_ready_summary))
+            context.resources.getString(R.string.not_ready_summary)
         }
         mAppIconResourceId = R.drawable.ic_disabled
         setIcon(mAppIconResourceId)
     }
 
-    override protected fun onBindDialogView(view: View) {
+    override fun onBindDialogView(view: View) {
         super.onBindDialogView(view)
         val list: ListView = view.findViewById(R.id.applist) as ListView
-        list.setAdapter(mAdapter)
-        list.setOnItemClickListener(object : OnItemClickListener {
+        list.adapter = mAdapter
+        list.onItemClickListener = object : OnItemClickListener {
             override fun onItemClick(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val info = parent.getItemAtPosition(position) as PackageItem
                 value = info.mValue
@@ -204,68 +208,68 @@ class AppSelectListPreference : CustomDialogPreference {
                 }
                 updatePreferenceViews()
                 callChangeListener(value)
-                getDialog().dismiss()
+                dialog.dismiss()
             }
-        })
+        }
     }
 
     private fun updatePreferenceViews() {
         var name: String? = null
-        if (shouldPersist()) {
-            name = getPersistedString(null)
+        name = if (shouldPersist()) {
+            getPersistedString(null)
         } else {
-            name = value
+            value
         }
         mAppIconResourceId = R.drawable.ic_disabled
         if (name != null) {
             mAppIconDrawable = null
             when (name) {
                 DISABLED_ENTRY -> {
-                    mTitle = getContext().getResources().getString(R.string.disabled_entry)
+                    mTitle = context.resources.getString(R.string.disabled_entry)
                     mAppIconResourceId = R.drawable.ic_disabled
                 }
                 TORCH_ENTRY -> {
-                    mTitle = getContext().getResources().getString(R.string.torch_entry)
+                    mTitle = context.resources.getString(R.string.torch_entry)
                     mAppIconResourceId = R.drawable.ic_flashlight
                 }
                 CAMERA_ENTRY -> {
-                    mTitle = getContext().getResources().getString(R.string.camera_entry)
+                    mTitle = context.resources.getString(R.string.camera_entry)
                     mAppIconResourceId = R.drawable.ic_camera
                 }
                 AMBIENT_DISPLAY_ENTRY -> {
-                    mTitle = getContext().getResources().getString(R.string.ambient_display_entry)
+                    mTitle = context.resources.getString(R.string.ambient_display_entry)
                     mAppIconResourceId = R.drawable.ic_ambient_display
                 }
                 else -> {
-                    val componentName: ComponentName = ComponentName.unflattenFromString(name)
+                    val componentName: ComponentName = ComponentName.unflattenFromString(name)!!
                     val item = mAdapter!!.resolveApplication(componentName)
                     if (item != null) {
                         mTitle = item.mTitle
                         mAppIconDrawable = resolveAppIcon(item)
                     } else {
-                        mTitle = getContext().getResources().getString(R.string.resolve_failed_summary)
+                        mTitle = context.resources.getString(R.string.resolve_failed_summary)
                     }
                 }
             }
         } else {
-            mTitle = getContext().getResources().getString(R.string.disabled_entry)
+            mTitle = context.resources.getString(R.string.disabled_entry)
             mAppIconResourceId = R.drawable.ic_disabled
         }
-        setSummary(mTitle)
+        summary = mTitle
         if (mAppIconDrawable != null) {
-            setIcon(mAppIconDrawable)
+            icon = mAppIconDrawable
         } else {
-            setIcon(mAppIconResourceId)
+            this.setIcon(mAppIconResourceId)
         }
     }
 
     private val defaultActivityIcon: Drawable
-        private get() = getContext().getResources().getDrawable(android.R.drawable.sym_def_app_icon)
+        get() = ResourcesCompat.getDrawable(context.resources, android.R.drawable.sym_def_app_icon, null)!!
 
     private fun resolveAppIcon(item: PackageItem): Drawable? {
         var appIcon: Drawable? = null
         try {
-            appIcon = mPm!!.getActivityIcon(item.mComponentName)
+            appIcon = mPm!!.getActivityIcon(item.mComponentName!!)
         } catch (e: NameNotFoundException) {
         }
         if (appIcon == null) {

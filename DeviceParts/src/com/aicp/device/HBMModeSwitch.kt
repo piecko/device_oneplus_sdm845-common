@@ -24,12 +24,12 @@ import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceChangeListener
 
 class HBMModeSwitch(context: Context) : OnPreferenceChangeListener {
-    private val mContext: Context
-    private val mHBMOffState: String
-    private val mHBMOnState: String
+    private val mContext: Context = context
+    private val mHBMOffState: String = context.resources.getString(R.string.hbmOFF)
+    private val mHBMOnState: String = context.resources.getString(R.string.hbmON)
     override fun onPreferenceChange(preference: Preference?, newValue: Any): Boolean {
         val enabled = newValue as Boolean
-        Settings.System.putInt(mContext.getContentResolver(), SETTINGS_KEY, if (enabled) 1 else 0)
+        Settings.System.putInt(mContext.contentResolver, SETTINGS_KEY, if (enabled) 1 else 0)
         Utils.writeValue(file, if (enabled) mHBMOnState else mHBMOffState)
         return true
     }
@@ -50,11 +50,5 @@ class HBMModeSwitch(context: Context) : OnPreferenceChangeListener {
         fun isCurrentlyEnabled(context: Context?): Boolean {
             return Utils.getFileValueAsBoolean(file, false)
         }
-    }
-
-    init {
-        mContext = context
-        mHBMOffState = context.getResources().getString(R.string.hbmOFF)
-        mHBMOnState = context.getResources().getString(R.string.hbmON)
     }
 }

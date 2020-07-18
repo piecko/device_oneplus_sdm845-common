@@ -24,10 +24,10 @@ import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceChangeListener
 
 class DCDModeSwitch(context: Context) : OnPreferenceChangeListener {
-    private val mContext: Context
+    private val mContext: Context = context
     override fun onPreferenceChange(preference: Preference?, newValue: Any): Boolean {
         val enabled = newValue as Boolean
-        Settings.System.putInt(mContext.getContentResolver(), SETTINGS_KEY, if (enabled) 1 else 0)
+        Settings.System.putInt(mContext.contentResolver, SETTINGS_KEY, if (enabled) 1 else 0)
         Utils.writeValue(file, if (enabled) "1" else "0")
         return true
     }
@@ -48,9 +48,5 @@ class DCDModeSwitch(context: Context) : OnPreferenceChangeListener {
         fun isCurrentlyEnabled(context: Context?): Boolean {
             return Utils.getFileValueAsBoolean(file, false)
         }
-    }
-
-    init {
-        mContext = context
     }
 }

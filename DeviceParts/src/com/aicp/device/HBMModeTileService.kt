@@ -50,6 +50,6 @@ class HBMModeTileService : TileService() {
         val sharedPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val enabled: Boolean = HBMModeSwitch.isCurrentlyEnabled(this)
         Utils.writeValue(HBMModeSwitch.Companion.file, if (enabled) "0" else "1")
-        sharedPrefs.edit().putBoolean(DeviceSettings.KEY_HBM_SWITCH, if (enabled) false else true).commit()
+        sharedPrefs.edit().putBoolean(DeviceSettings.KEY_HBM_SWITCH, !enabled).apply()
     }
 }
