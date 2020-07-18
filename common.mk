@@ -102,7 +102,7 @@ PRODUCT_PACKAGES += \
 
 # DeviceParts
 PRODUCT_PACKAGES += \
-    DeviceParts
+    DeviceParts_enchilada
 
 # Display
 PRODUCT_PACKAGES += \
