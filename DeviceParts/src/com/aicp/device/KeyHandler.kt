@@ -48,9 +48,8 @@ import com.android.internal.util.aicp.AicpUtils
 import com.android.internal.util.aicp.AicpVibe
 import com.android.internal.util.aicp.CustomKeyHandler
 import com.android.internal.util.aicp.PackageUtils
-import java.io.File
 
-class KeyHandler(context: Context) : CustomKeyHandler {
+open class KeyHandler(context: Context) : CustomKeyHandler {
     protected val mContext: Context = context
     private val mPowerManager: PowerManager
     private val mEventHandler: EventHandler
@@ -331,25 +330,25 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         /* for the music playback gestures, just return the expected values */
         when (scanCode) {
             GESTURE_II_SCANCODE -> return AppSelectListPreference.MUSIC_PLAY_ENTRY
-            GESTURE_CIRCLE_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_CIRCLE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_1, UserHandle.USER_CURRENT)
-            GESTURE_V_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_V_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_2, UserHandle.USER_CURRENT)
-            GESTURE_M_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_M_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_3, UserHandle.USER_CURRENT)
-            GESTURE_S_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_S_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_4, UserHandle.USER_CURRENT)
-            GESTURE_W_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_W_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_5, UserHandle.USER_CURRENT)
             GESTURE_LEFT_V_SCANCODE -> return AppSelectListPreference.MUSIC_PREV_ENTRY
             GESTURE_RIGHT_V_SCANCODE -> return AppSelectListPreference.MUSIC_NEXT_ENTRY
-            GESTURE_DOWN_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_DOWN_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_6, UserHandle.USER_CURRENT)
-            GESTURE_UP_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_UP_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_7, UserHandle.USER_CURRENT)
-            GESTURE_LEFT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_LEFT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_8, UserHandle.USER_CURRENT)
-            GESTURE_RIGHT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.getContentResolver(),
+            GESTURE_RIGHT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
                     GestureSettings.DEVICE_GESTURE_MAPPING_9, UserHandle.USER_CURRENT)
         }
         return null
