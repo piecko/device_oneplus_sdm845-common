@@ -17,8 +17,8 @@
 */
 package com.aicp.device
 
-import android.content.ContentResolver
 import android.content.Context
+import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
 import android.util.AttributeSet
@@ -29,22 +29,24 @@ import com.aicp.device.Utils.writeValue
 class VibratorNotifStrengthPreference(context: Context, attrs: AttributeSet?) : VibratorStrengthPreference(context, attrs) {
     private val mMinValue = 116
     private val mMaxValue = 2088
-    private val mVibrator: Vibrator
+    private val mVibrator: Vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     override fun getValue(context: Context?): String {
         return getFileValue(FILE_LEVEL, DEFAULT_VALUE)
     }
 
     override fun setValue(newValue: String?, withFeedback: Boolean) {
         writeValue(FILE_LEVEL, newValue)
-        Settings.System.putString(getContext().getContentResolver(), SETTINGS_KEY, newValue)
+        Settings.System.putString(context.contentResolver, SETTINGS_KEY, newValue)
         if (withFeedback) {
-            mVibrator.vibrate(testVibrationPattern, -1)
+            mVibrator.vibrate(testVibrationPattern)
         }
     }
 
     companion object {
         protected var FILE_LEVEL = "/sys/class/leds/vibrator/vmax_mv_strong"
-        protected var testVibrationPattern = longArrayOf(0, 250)
+        protected var testVibrationPattern: VibrationEffect = VibrationEffect.createOneShot(250,
+            VibrationEffect.DEFAULT_AMPLITUDE
+        )
         protected var SETTINGS_KEY = DeviceSettings.KEY_SETTINGS_PREFIX + DeviceSettings.KEY_NOTIF_VIBSTRENGTH
         protected var DEFAULT_VALUE = "2008"
         val isSupported: Boolean
@@ -55,7 +57,7 @@ class VibratorNotifStrengthPreference(context: Context, attrs: AttributeSet?) : 
             if (!isSupported) {
                 return
             }
-            var storedValue: String = Settings.System.getString(context.getContentResolver(), SETTINGS_KEY)
+            var storedValue: String = Settings.System.getString(context.contentResolver, SETTINGS_KEY)
             writeValue(FILE_LEVEL, storedValue)
         }
     }
@@ -64,7 +66,6 @@ class VibratorNotifStrengthPreference(context: Context, attrs: AttributeSet?) : 
         // from drivers/platform/msm/qpnp-haptic.c
         // #define QPNP_HAP_VMAX_MIN_MV		116
         // #define QPNP_HAP_VMAX_MAX_MV		3596
-        mVibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        setLayoutResource(R.layout.preference_seek_bar)
+        layoutResource = R.layout.preference_seek_bar
     }
 }

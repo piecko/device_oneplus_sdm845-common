@@ -19,7 +19,6 @@
 package com.aicp.device
 
 import android.annotation.TargetApi
-import android.content.Intent
 import android.content.SharedPreferences
 import android.service.quicksettings.TileService
 import androidx.preference.PreferenceManager
@@ -49,8 +48,8 @@ class HBMModeTileService : TileService() {
     override fun onClick() {
         super.onClick()
         val sharedPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val enabled: Boolean = HBMModeSwitch.isCurrentlyEnabled(this)
+        val enabled: Boolean = HBMModeSwitch.isCurrentlyEnabled()
         Utils.writeValue(HBMModeSwitch.Companion.file, if (enabled) "0" else "1")
-        sharedPrefs.edit().putBoolean(DeviceSettings.KEY_HBM_SWITCH, if (enabled) false else true).commit()
+        sharedPrefs.edit().putBoolean(DeviceSettings.KEY_HBM_SWITCH, !enabled).apply()
     }
 }

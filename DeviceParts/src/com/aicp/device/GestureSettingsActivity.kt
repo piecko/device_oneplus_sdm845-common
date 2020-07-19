@@ -18,33 +18,23 @@
 */
 package com.aicp.device
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.app.Dialog
-import android.app.DialogFragment
-import android.app.Fragment
-import android.content.DialogInterface
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragment
-import androidx.preference.PreferenceManager
+import androidx.fragment.app.FragmentActivity
 
-class GestureSettingsActivity : Activity() {
+class GestureSettingsActivity :  FragmentActivity() {
     private var mGestureSettingsFragment: GestureSettings? = null
-    override protected fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getActionBar().setDisplayHomeAsUpEnabled(true)
+        actionBar?.setDisplayHomeAsUpEnabled(true)
         mGestureSettingsFragment = GestureSettings()
-        getFragmentManager().beginTransaction()
-                .add(android.R.id.content, mGestureSettingsFragment)
+        supportFragmentManager.beginTransaction()
+                .add(android.R.id.content, mGestureSettingsFragment!!)
                 .commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             android.R.id.home -> {
                 finish()
                 return true

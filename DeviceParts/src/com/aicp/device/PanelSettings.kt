@@ -18,45 +18,31 @@
 */
 package com.aicp.device
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.res.Resources
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.preference.PreferenceFragment
-import androidx.preference.ListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceManager
-import androidx.preference.PreferenceScreen
-import androidx.preference.TwoStatePreference
 import android.provider.Settings
-import android.text.TextUtils
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.ListView
-import android.widget.RadioButton
 import android.widget.RadioGroup
-import android.util.Log
+import androidx.preference.PreferenceFragmentCompat
 
-class PanelSettings : PreferenceFragment(), RadioGroup.OnCheckedChangeListener {
+class PanelSettings : PreferenceFragmentCompat(), RadioGroup.OnCheckedChangeListener {
     private var mRadioGroup: RadioGroup? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mRadioGroup = view.findViewById(R.id.radio_group) as RadioGroup
         var checkedButtonId: Int = R.id.off_mode
-        if (WideModeSwitch.isCurrentlyEnabled(getContext())) {
-            checkedButtonId = R.id.wide_mode
-        } else if (DCIModeSwitch.isCurrentlyEnabled(getContext())) {
-            checkedButtonId = R.id.dci_mode
-        } else if (SRGBModeSwitch.isCurrentlyEnabled(getContext())) {
-            checkedButtonId = R.id.srgb_mode
+        when {
+            WideModeSwitch.isCurrentlyEnabled() -> {
+                checkedButtonId = R.id.wide_mode
+            }
+            DCIModeSwitch.isCurrentlyEnabled() -> {
+                checkedButtonId = R.id.dci_mode
+            }
+            SRGBModeSwitch.isCurrentlyEnabled() -> {
+                checkedButtonId = R.id.srgb_mode
+            }
         }
         mRadioGroup!!.check(checkedButtonId)
         mRadioGroup!!.setOnCheckedChangeListener(this)
@@ -71,24 +57,24 @@ class PanelSettings : PreferenceFragment(), RadioGroup.OnCheckedChangeListener {
     }
 
     override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
-        Utils.writeValue(DCIModeSwitch.Companion.file, "0")
-        Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 0)
-        Utils.writeValue(WideModeSwitch.Companion.file, "0")
-        Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 0)
-        Utils.writeValue(SRGBModeSwitch.Companion.file, "0")
-        Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 0)
+        Utils.writeValue(DCIModeSwitch.file, "0")
+        Settings.System.putInt(context?.contentResolver, DCIModeSwitch.SETTINGS_KEY, 0)
+        Utils.writeValue(WideModeSwitch.file, "0")
+        Settings.System.putInt(context?.contentResolver, WideModeSwitch.SETTINGS_KEY, 0)
+        Utils.writeValue(SRGBModeSwitch.file, "0")
+        Settings.System.putInt(context?.contentResolver, SRGBModeSwitch.SETTINGS_KEY, 0)
         when (checkedId) {
             R.id.srgb_mode -> {
-                Utils.writeValue(SRGBModeSwitch.Companion.file, "1")
-                Settings.System.putInt(getContext().getContentResolver(), SRGBModeSwitch.SETTINGS_KEY, 1)
+                Utils.writeValue(SRGBModeSwitch.file, "1")
+                Settings.System.putInt(context?.contentResolver, SRGBModeSwitch.SETTINGS_KEY, 1)
             }
             R.id.dci_mode -> {
-                Utils.writeValue(DCIModeSwitch.Companion.file, "1")
-                Settings.System.putInt(getContext().getContentResolver(), DCIModeSwitch.SETTINGS_KEY, 1)
+                Utils.writeValue(DCIModeSwitch.file, "1")
+                Settings.System.putInt(context?.contentResolver, DCIModeSwitch.SETTINGS_KEY, 1)
             }
             R.id.wide_mode -> {
-                Utils.writeValue(WideModeSwitch.Companion.file, "1")
-                Settings.System.putInt(getContext().getContentResolver(), WideModeSwitch.SETTINGS_KEY, 1)
+                Utils.writeValue(WideModeSwitch.file, "1")
+                Settings.System.putInt(context?.contentResolver, WideModeSwitch.SETTINGS_KEY, 1)
             }
             R.id.off_mode -> {
             }
