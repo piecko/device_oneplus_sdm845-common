@@ -368,11 +368,6 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         return event.values[0].toInt() == 1
     }
 
-    private inner class ClientPackageNameObserver(file: String?) : FileObserver(File(CLIENT_PACKAGE_PATH), MODIFY) {
-        override fun onEvent(event: Int, file: String?) {
-        }
-    }
-
     companion object {
         private const val TAG = "KeyHandler"
         private const val DEBUG = false
