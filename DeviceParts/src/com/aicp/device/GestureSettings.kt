@@ -361,7 +361,7 @@ class GestureSettings : PreferenceFragmentCompat(),
             CustomDialogPreferenceCompat.CustomPreferenceDialogFragment
                 .newInstance(preference.getKey())
         fragment.setTargetFragment(this, 0)
-        parentFragmentManager.let { fragment.show(it, "dialog_preference") }
+        fragment.show(parentFragmentManager, "dialog_preference")
     }
 
     override fun onResume() {
