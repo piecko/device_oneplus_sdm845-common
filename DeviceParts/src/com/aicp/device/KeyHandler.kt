@@ -21,58 +21,195 @@ package com.aicp.device
 import android.app.ActivityManager
 import android.app.NotificationManager
 import android.content.*
+import android.database.ContentObserver
 import android.hardware.Sensor
 import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.IAudioService
 import android.media.session.MediaSessionLegacyHelper
+import android.net.Uri
 import android.os.*
 import android.os.PowerManager.WakeLock
-import android.os.ServiceManager
-import android.os.SystemProperties
-import android.os.UEventObserver
 import android.provider.Settings
-import android.provider.Settings.Global.ZEN_MODE_ALARMS
-import android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
-import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.text.TextUtils
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.WindowManagerGlobal
+import com.aicp.device.GestureSettings
+import com.aicp.device.KeyHandler.ClientPackageNameObserver
+import com.aicp.device.KeyHandler.SettingsObserver
+import com.aicp.device.Utils.fileWritable
+import com.aicp.device.Utils.getFileValue
+import com.aicp.device.Utils.writeValue
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.util.ArrayUtils
 import com.android.internal.util.aicp.AicpUtils
 import com.android.internal.util.aicp.AicpVibe
-import com.android.internal.util.aicp.CustomKeyHandler
+import com.android.internal.util.aicp.DeviceKeyHandler
 import com.android.internal.util.aicp.PackageUtils
 
-class KeyHandler(val context: Context) : CustomKeyHandler {
-    private val mContext: Context = context
+class KeyHandler(val mContext: Context) : DeviceKeyHandler {
     private val mPowerManager: PowerManager
     private val mEventHandler: EventHandler
     private val mGestureWakeLock: WakeLock
+    private val mHandler = Handler()
+    private val mSettingsObserver: SettingsObserver
     private val mNoMan: NotificationManager
     private val mAudioManager: AudioManager
-    private val mProxyIsNear = false
-    private var mDispOn: Boolean
+    private val mSensorManager: SensorManager
+    private var mProxyIsNear = false
+    private var mUseProxiCheck = false
+    private val mTiltSensor: Sensor?
+    private var mUseTiltCheck = false
+    private var mProxyWasNear = false
+    private var mProxySensorTimestamp: Long = 0
+    private var mUseWaveCheck = false
+    private val mPocketSensor: Sensor?
+    private var mUsePocketCheck = false
+    private val mFPcheck = false
+    private var mDispOn = true
+    private val isFpgesture = false
+    private var mClientObserver: ClientPackageNameObserver? = null
     private var mRestoreUser = false
     private var mUseSliderTorch = false
     private var mTorchState = false
+    private var mDoubleTapToWake = false
+    private val mProximitySensor: SensorEventListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            mProxyIsNear = event.values[0] == 1F
+            Log.i(
+                TAG,
+                "mProxyIsNear = $mProxyIsNear mProxyWasNear = $mProxyWasNear"
+            )
+            if (mUseProxiCheck) {
+                if (fileWritable(GOODIX_CONTROL_PATH)) {
+                    writeValue(
+                        GOODIX_CONTROL_PATH,
+                        if (mProxyIsNear) "1" else "0"
+                    )
+                }
+            }
+            if (mUseWaveCheck || mUsePocketCheck) {
+                if (mProxyWasNear && !mProxyIsNear) {
+                    val delta =
+                        SystemClock.elapsedRealtime() - mProxySensorTimestamp
+                    Log.i(
+                        TAG,
+                        "delta = $delta"
+                    )
+                    if (mUseWaveCheck && delta < HANDWAVE_MAX_DELTA_MS) {
+                        launchDozePulse()
+                    }
+                    if (mUsePocketCheck && delta > POCKET_MIN_DELTA_MS) {
+                        launchDozePulse()
+                    }
+                }
+                mProxySensorTimestamp = SystemClock.elapsedRealtime()
+                mProxyWasNear = mProxyIsNear
+            }
+        }
+
+        override fun onAccuracyChanged(
+            sensor: Sensor,
+            accuracy: Int
+        ) {
+        }
+    }
+    private val mTiltSensorListener: SensorEventListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.values[0] == 1F) {
+                launchDozePulse()
+            }
+        }
+
+        override fun onAccuracyChanged(
+            sensor: Sensor,
+            accuracy: Int
+        ) {
+        }
+    }
+
+    private inner class SettingsObserver internal constructor(handler: Handler?) :
+        ContentObserver(handler) {
+        fun observe() {
+            mContext.contentResolver.registerContentObserver(
+                Settings.System.getUriFor(
+                    Settings.System.OMNI_DEVICE_PROXI_CHECK_ENABLED
+                ),
+                false, this
+            )
+            mContext.contentResolver.registerContentObserver(
+                Settings.System.getUriFor(
+                    Settings.System.OMNI_DEVICE_FEATURE_SETTINGS
+                ),
+                false, this
+            )
+            mContext.contentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(
+                    Settings.Secure.DOUBLE_TAP_TO_WAKE
+                ),
+                false, this
+            )
+            update()
+            updateDozeSettings()
+        }
+
+        override fun onChange(selfChange: Boolean) {
+            update()
+        }
+
+        override fun onChange(
+            selfChange: Boolean,
+            uri: Uri
+        ) {
+            if (uri == Settings.System.getUriFor(
+                    Settings.System.OMNI_DEVICE_FEATURE_SETTINGS
+                )
+            ) {
+                updateDozeSettings()
+                return
+            }
+            update()
+        }
+
+        fun update() {
+            mUseProxiCheck = Settings.System.getIntForUser(
+                mContext.contentResolver,
+                Settings.System.OMNI_DEVICE_PROXI_CHECK_ENABLED,
+                1,
+                UserHandle.USER_CURRENT
+            ) == 1
+            mDoubleTapToWake = Settings.Secure.getIntForUser(
+                mContext.contentResolver,
+                Settings.Secure.DOUBLE_TAP_TO_WAKE,
+                0,
+                UserHandle.USER_CURRENT
+            ) == 1
+            updateDoubleTapToWake()
+        }
+    }
+
     private val mSystemStateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action.equals(Intent.ACTION_SCREEN_ON)) {
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            if (intent.action == Intent.ACTION_SCREEN_ON) {
                 mDispOn = true
                 onDisplayOn()
-            } else if (intent.action.equals(Intent.ACTION_SCREEN_OFF)) {
+            } else if (intent.action == Intent.ACTION_SCREEN_OFF) {
                 mDispOn = false
                 onDisplayOff()
-            } else if (intent.action.equals(Intent.ACTION_USER_SWITCHED)) {
-                val userId: Int = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL)
+            } else if (intent.action == Intent.ACTION_USER_SWITCHED) {
+                val userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL)
                 if (userId == UserHandle.USER_SYSTEM && mRestoreUser) {
-                    if (DEBUG) Log.i(TAG, "ACTION_USER_SWITCHED to system")
+                    Log.i(
+                        TAG,
+                        "ACTION_USER_SWITCHED to system"
+                    )
                     Startup.restoreAfterUserSwitch(context)
                 } else {
                     mRestoreUser = true
@@ -81,33 +218,40 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
         }
     }
 
-    private fun hasSetupCompleted(): Boolean {
-        return Settings.Secure.getInt(mContext.contentResolver,
-                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0
-    }
-
     private inner class EventHandler : Handler() {
-        override fun handleMessage(msg: Message?) {}
+        override fun handleMessage(msg: Message) {}
     }
 
-    override fun handleKeyEvent(event: KeyEvent): Boolean {
-        if (event.action != KeyEvent.ACTION_UP) {
-            return false
-        }
-        return if (!hasSetupCompleted()) {
+    fun handleKeyEvent(event: KeyEvent): Boolean {
+        return if (event.action != KeyEvent.ACTION_UP) {
             false
         } else false
     }
 
-    override fun canHandleKeyEvent(event: KeyEvent): Boolean {
-        return ArrayUtils.contains(sSupportedGestures, event.scanCode)
+    fun canHandleKeyEvent(event: KeyEvent): Boolean {
+        return ArrayUtils.contains(
+            sSupportedGestures,
+            event.scanCode
+        )
     }
 
-    override fun isDisabledKeyEvent(event: KeyEvent?): Boolean {
+    fun isDisabledKeyEvent(event: KeyEvent): Boolean {
+        val isProxyCheckRequired = mUseProxiCheck &&
+                ArrayUtils.contains(
+                    sProxiCheckedGestures,
+                    event.scanCode
+                )
+        if (mProxyIsNear && isProxyCheckRequired) {
+            Log.i(
+                TAG,
+                "isDisabledKeyEvent: blocked by proxi sensor - scanCode=" + event.scanCode
+            )
+            return true
+        }
         return false
     }
 
-    override fun isCameraLaunchEvent(event: KeyEvent): Boolean {
+    fun isCameraLaunchEvent(event: KeyEvent): Boolean {
         if (event.action != KeyEvent.ACTION_UP) {
             return false
         }
@@ -115,27 +259,39 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
         return !TextUtils.isEmpty(value) && value == AppSelectListPreference.CAMERA_ENTRY
     }
 
-    override fun isWakeEvent(event: KeyEvent): Boolean {
+    fun isWakeEvent(event: KeyEvent): Boolean {
         if (event.action != KeyEvent.ACTION_UP) {
             return false
         }
         val value = getGestureValueForScanCode(event.scanCode)
         if (!TextUtils.isEmpty(value) && value == AppSelectListPreference.WAKE_ENTRY) {
-            if (DEBUG) Log.i(TAG, "isWakeEvent " + event.scanCode.toString() + value)
+            Log.i(
+                TAG,
+                "isWakeEvent " + event.scanCode + value
+            )
             return true
         }
         return event.scanCode == KEY_DOUBLE_TAP
     }
 
-    override fun isActivityLaunchEvent(event: KeyEvent): Intent? {
+    fun isActivityLaunchEvent(event: KeyEvent): Intent? {
         if (event.action != KeyEvent.ACTION_UP) {
             return null
         }
         val value = getGestureValueForScanCode(event.scanCode)
         if (!TextUtils.isEmpty(value) && value != AppSelectListPreference.DISABLED_ENTRY) {
-            if (DEBUG) Log.i(TAG, "isActivityLaunchEvent " + event.scanCode.toString() + value)
+            Log.i(
+                TAG,
+                "isActivityLaunchEvent " + event.scanCode + value
+            )
             if (!launchSpecialActions(value)) {
-                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
+                AicpVibe.performHapticFeedbackLw(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    false,
+                    mContext,
+                    GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                    GESTURE_HAPTIC_DURATION
+                )
                 return createIntent(value)
             }
         }
@@ -144,8 +300,15 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
 
     private val audioService: IAudioService?
         get() {
-            return IAudioService.Stub
-                    .asInterface(ServiceManager.checkService(Context.AUDIO_SERVICE))
+            val audioService: IAudioService = IAudioService.Stub
+                .asInterface(ServiceManager.checkService(Context.AUDIO_SERVICE))
+            if (audioService == null) {
+                Log.w(
+                    TAG,
+                    "Unable to find IAudioService interface."
+                )
+            }
+            return audioService
         }
 
     val isMusicActive: Boolean
@@ -155,9 +318,11 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
         if (ActivityManager.isSystemReady()) {
             val audioService: IAudioService? = audioService
             if (audioService != null) {
-                var event = KeyEvent(SystemClock.uptimeMillis(),
-                        SystemClock.uptimeMillis(), KeyEvent.ACTION_DOWN,
-                        keycode, 0)
+                var event = KeyEvent(
+                    SystemClock.uptimeMillis(),
+                    SystemClock.uptimeMillis(), KeyEvent.ACTION_DOWN,
+                    keycode, 0
+                )
                 dispatchMediaKeyEventUnderWakelock(event)
                 event = KeyEvent.changeAction(event, KeyEvent.ACTION_UP)
                 dispatchMediaKeyEventUnderWakelock(event)
@@ -172,17 +337,59 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
     }
 
     private fun onDisplayOn() {
-        if (DEBUG) Log.i(TAG, "Display on")
+        Log.i(
+            TAG,
+            "Display on"
+        )
+        if (enableProxiSensor()) {
+            mSensorManager.unregisterListener(mProximitySensor, mPocketSensor)
+            enableGoodix()
+        }
+        if (mUseTiltCheck) {
+            mSensorManager.unregisterListener(mTiltSensorListener, mTiltSensor)
+        }
+    }
+
+    private fun enableGoodix() {
+        if (fileWritable(GOODIX_CONTROL_PATH)) {
+            writeValue(
+                GOODIX_CONTROL_PATH,
+                "0"
+            )
+        }
     }
 
     private fun onDisplayOff() {
-        if (DEBUG) Log.i(TAG, "Display off")
+        Log.i(
+            TAG,
+            "Display off"
+        )
+        if (enableProxiSensor()) {
+            mProxyWasNear = false
+            mSensorManager.registerListener(
+                mProximitySensor, mPocketSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+            mProxySensorTimestamp = SystemClock.elapsedRealtime()
+        }
+        if (mUseTiltCheck) {
+            mSensorManager.registerListener(
+                mTiltSensorListener, mTiltSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
+        if (mClientObserver != null) {
+            mClientObserver!!.stopWatching()
+            mClientObserver = null
+        }
     }
 
     private fun getSliderAction(position: Int): Int {
-        var value: String? = Settings.System.getStringForUser(mContext.contentResolver,
-                Settings.System.OMNI_BUTTON_EXTRA_KEY_MAPPING,
-                UserHandle.USER_CURRENT)
+        var value: String? = Settings.System.getStringForUser(
+            mContext.contentResolver,
+            Settings.System.OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            UserHandle.USER_CURRENT
+        )
         val defaultValue = DeviceSettings.SLIDER_DEFAULT_VALUE
         if (value == null) {
             value = defaultValue
@@ -199,77 +406,42 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
 
     private fun doHandleSliderAction(position: Int) {
         val action = getSliderAction(position)
-        var positionValue = 0
-        when (action) {
-            0 -> {
-                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
-                mTorchState = false
-                positionValue = MODE_RING
-            }
-            1 -> {
-                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE)
-                mTorchState = false
-                positionValue = MODE_VIBRATE
-            }
-            2 -> {
-                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT)
-                mTorchState = false
-                positionValue = MODE_SILENT
-            }
-            3 -> {
-                mNoMan.setZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
-                mTorchState = false
-                positionValue = MODE_PRIORITY_ONLY
-            }
-            4 -> {
-                mNoMan.setZenMode(ZEN_MODE_ALARMS, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
-                mTorchState = false
-                positionValue = MODE_ALARMS_ONLY
-            }
-            5 -> {
-                mNoMan.setZenMode(ZEN_MODE_NO_INTERRUPTIONS, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
-                mTorchState = false
-                positionValue = MODE_TOTAL_SILENCE
-            }
-            6 -> {
-                mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
-                mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
-                positionValue = MODE_FLASHLIGHT
-                mUseSliderTorch = true
-                mTorchState = true
-            }
+        if (action == 0) {
+            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
+            mTorchState = false
+        } else if (action == 1) {
+            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE)
+            mTorchState = false
+        } else if (action == 2) {
+            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT)
+            mTorchState = false
+        } else if (action == 3) {
+            mNoMan.setZenMode(
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                null,
+                TAG
+            )
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
+            mTorchState = false
+        } else if (action == 4) {
+            mNoMan.setZenMode(ZEN_MODE_OFF, null, TAG)
+            mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL)
+            mUseSliderTorch = true
+            mTorchState = true
         }
-        if (positionValue != 0) {
-            sendUpdateBroadcast(position, positionValue)
-        }
-        if (!mProxyIsNear && mUseSliderTorch && action < 4) {
+        if ((!mProxyIsNear && mUseProxiCheck || !mUseProxiCheck) && mUseSliderTorch && action < 4) {
             launchSpecialActions(AppSelectListPreference.TORCH_ENTRY)
             mUseSliderTorch = false
-        } else if (!mProxyIsNear && mUseSliderTorch) {
+        } else if ((!mProxyIsNear && mUseProxiCheck || !mUseProxiCheck) && mUseSliderTorch) {
             launchSpecialActions(AppSelectListPreference.TORCH_ENTRY)
         }
-    }
-
-    private fun sendUpdateBroadcast(position: Int, position_value: Int) {
-        val extras = Bundle()
-        val intent = Intent(ACTION_UPDATE_SLIDER_POSITION)
-        extras.putInt(EXTRA_SLIDER_POSITION, position)
-        extras.putInt(EXTRA_SLIDER_POSITION_VALUE, position_value)
-        intent.putExtras(extras)
-        mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT)
-        intent.flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY
-        Log.d(TAG, "slider change to positon " + position
-                + " with value " + position_value)
     }
 
     private fun createIntent(value: String?): Intent {
-        val componentName: ComponentName? = ComponentName.unflattenFromString(value)
+        val componentName = ComponentName.unflattenFromString(value!!)
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
@@ -279,47 +451,69 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
     }
 
     private fun launchSpecialActions(value: String?): Boolean {
-        val musicPlaybackEnabled = Settings.System.getIntForUser(mContext.contentResolver,
-                "Settings.System.$GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME", 0, UserHandle.USER_CURRENT) == 1
-        /* handle music playback gesture if enabled */
-        if (musicPlaybackEnabled) {
-            when (value) {
-                AppSelectListPreference.MUSIC_PLAY_ENTRY -> {
-                    mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION)
-                    AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
-                    dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-                    return true
-                }
-                AppSelectListPreference.MUSIC_NEXT_ENTRY -> {
-                    if (isMusicActive) {
-                        mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION)
-                        AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
-                        dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_NEXT)
-                    }
-                    return true
-                }
-                AppSelectListPreference.MUSIC_PREV_ENTRY -> {
-                    if (isMusicActive) {
-                        mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION)
-                        AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
-                        dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                    }
-                    return true
-                }
-            }
-        }
         if (value == AppSelectListPreference.TORCH_ENTRY) {
-            mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION)
+            mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION.toLong())
             val service: IStatusBarService = statusBarService
-            try {
-                service.toggleCameraFlash()
-                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
-                return true
-            } catch (e: RemoteException) {
-                // do nothing.
+            if (service != null) {
+                try {
+                    service.toggleCameraFlash()
+                    AicpVibe.performHapticFeedbackLw(
+                        HapticFeedbackConstants.LONG_PRESS,
+                        false,
+                        mContext,
+                        GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                        GESTURE_HAPTIC_DURATION
+                    )
+                    return true
+                } catch (e: RemoteException) {
+                    // do nothing.
+                }
             }
+        } else if (value == AppSelectListPreference.MUSIC_PLAY_ENTRY) {
+            mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION.toLong())
+            AicpVibe.performHapticFeedbackLw(
+                HapticFeedbackConstants.LONG_PRESS,
+                false,
+                mContext,
+                GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                GESTURE_HAPTIC_DURATION
+            )
+            dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            return true
+        } else if (value == AppSelectListPreference.MUSIC_NEXT_ENTRY) {
+            if (isMusicActive) {
+                mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION.toLong())
+                AicpVibe.performHapticFeedbackLw(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    false,
+                    mContext,
+                    GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                    GESTURE_HAPTIC_DURATION
+                )
+                dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_NEXT)
+            }
+            return true
+        } else if (value == AppSelectListPreference.MUSIC_PREV_ENTRY) {
+            if (isMusicActive) {
+                mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION.toLong())
+                AicpVibe.performHapticFeedbackLw(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    false,
+                    mContext,
+                    GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                    GESTURE_HAPTIC_DURATION
+                )
+                dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+            }
+            return true
         } else if (value == AppSelectListPreference.AMBIENT_DISPLAY_ENTRY) {
-            AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
+            AicpVibe.performHapticFeedbackLw(
+                HapticFeedbackConstants.LONG_PRESS,
+                false,
+                mContext,
+                GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME,
+                GESTURE_HAPTIC_DURATION
+            )
             launchDozePulse()
             return true
         }
@@ -327,67 +521,136 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
     }
 
     private fun getGestureValueForScanCode(scanCode: Int): String? {
-        /* for the music playback gestures, just return the expected values */
         when (scanCode) {
-            GESTURE_II_SCANCODE -> return AppSelectListPreference.MUSIC_PLAY_ENTRY
-            GESTURE_CIRCLE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_1, UserHandle.USER_CURRENT)
-            GESTURE_V_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_2, UserHandle.USER_CURRENT)
-            GESTURE_M_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_3, UserHandle.USER_CURRENT)
-            GESTURE_S_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_4, UserHandle.USER_CURRENT)
-            GESTURE_W_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_5, UserHandle.USER_CURRENT)
-            GESTURE_LEFT_V_SCANCODE -> return AppSelectListPreference.MUSIC_PREV_ENTRY
-            GESTURE_RIGHT_V_SCANCODE -> return AppSelectListPreference.MUSIC_NEXT_ENTRY
-            GESTURE_DOWN_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_6, UserHandle.USER_CURRENT)
-            GESTURE_UP_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_7, UserHandle.USER_CURRENT)
-            GESTURE_LEFT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_8, UserHandle.USER_CURRENT)
-            GESTURE_RIGHT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(mContext.contentResolver,
-                    GestureSettings.DEVICE_GESTURE_MAPPING_9, UserHandle.USER_CURRENT)
+            GESTURE_II_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_0, UserHandle.USER_CURRENT
+            )
+            GESTURE_CIRCLE_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_1, UserHandle.USER_CURRENT
+            )
+            GESTURE_V_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_2, UserHandle.USER_CURRENT
+            )
+            GESTURE_A_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_3, UserHandle.USER_CURRENT
+            )
+            GESTURE_LEFT_V_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_4, UserHandle.USER_CURRENT
+            )
+            GESTURE_RIGHT_V_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_5, UserHandle.USER_CURRENT
+            )
+            GESTURE_DOWN_SWIPE_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_6, UserHandle.USER_CURRENT
+            )
+            GESTURE_UP_SWIPE_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_7, UserHandle.USER_CURRENT
+            )
+            GESTURE_LEFT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_8, UserHandle.USER_CURRENT
+            )
+            GESTURE_RIGHT_SWIPE_SCANCODE -> return Settings.System.getStringForUser(
+                mContext.contentResolver,
+                GestureSettings.DEVICE_GESTURE_MAPPING_9, UserHandle.USER_CURRENT
+            )
         }
         return null
     }
 
     private fun launchDozePulse() {
-        if (DEBUG) Log.i(TAG, "Doze pulse")
-        mContext.sendBroadcastAsUser(Intent(DOZE_INTENT),
-                UserHandle(UserHandle.USER_CURRENT))
+        Log.i(
+            TAG,
+            "Doze pulse"
+        )
+        mContext.sendBroadcastAsUser(
+            Intent(DOZE_INTENT),
+            UserHandle(UserHandle.USER_CURRENT)
+        )
+    }
+
+    private fun enableProxiSensor(): Boolean {
+        return mUsePocketCheck || mUseWaveCheck || mUseProxiCheck
+    }
+
+    private fun updateDozeSettings() {
+        val value: String = Settings.System.getStringForUser(
+            mContext.contentResolver,
+            Settings.System.OMNI_DEVICE_FEATURE_SETTINGS,
+            UserHandle.USER_CURRENT
+        )
+        Log.i(
+            TAG,
+            "Doze settings = $value"
+        )
+        if (!TextUtils.isEmpty(value)) {
+            val parts = value.split(":".toRegex()).toTypedArray()
+            mUseWaveCheck = java.lang.Boolean.valueOf(parts[0])
+            mUsePocketCheck = java.lang.Boolean.valueOf(parts[1])
+            mUseTiltCheck = java.lang.Boolean.valueOf(parts[2])
+        }
     }
 
     val statusBarService: IStatusBarService
         get() = IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar"))
 
-    override fun getCustomProxiIsNear(event: SensorEvent): Boolean {
-        return event.values[0].toInt() == 1
+    fun getCustomProxiIsNear(event: SensorEvent): Boolean {
+        return event.values[0] == 1F
+    }
+
+    val customProxiSensor: String
+        get() = "oneplus.sensor.pocket"
+
+    private inner class ClientPackageNameObserver(file: String?) : FileObserver(
+        CLIENT_PACKAGE_PATH,
+        MODIFY
+    ) {
+        override fun onEvent(event: Int, file: String?) {
+            val pkgName = getFileValue(
+                CLIENT_PACKAGE_PATH,
+                "0"
+            )
+        }
+    }
+
+    private fun updateDoubleTapToWake() {
+        Log.i(
+            TAG,
+            "udateDoubleTapToWake $mDoubleTapToWake"
+        )
+        if (fileWritable(DT2W_CONTROL_PATH)) {
+            writeValue(
+                DT2W_CONTROL_PATH,
+                if (mDoubleTapToWake) "1" else "0"
+            )
+        }
     }
 
     companion object {
         private const val TAG = "KeyHandler"
-        private const val DEBUG = false
-        private const val DEBUG_SENSOR = false
-        protected const val GESTURE_REQUEST = 1
-        private const val GESTURE_WAKELOCK_DURATION = 2000L
+        private const val DEBUG = true
+        private const val DEBUG_SENSOR = true
+        const val GESTURE_REQUEST = 1
+        private const val GESTURE_WAKELOCK_DURATION = 2000
         const val GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME = "OFF_GESTURE_HAPTIC_ENABLE"
-        const val GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME = "MUSIC_PLAYBACK_GESTURE_ENABLE"
         private const val GESTURE_HAPTIC_DURATION = 50
+        private const val GOODIX_CONTROL_PATH =
+            "/sys/devices/platform/soc/soc:goodix_fp/proximity_state"
         private const val DT2W_CONTROL_PATH = "/proc/touchpanel/double_tap_enable"
-        const val ACTION_UPDATE_SLIDER_POSITION = "com.aicp.device.UPDATE_SLIDER_POSITION"
-        const val EXTRA_SLIDER_POSITION = "position"
-        const val EXTRA_SLIDER_POSITION_VALUE = "position_value"
-        private const val GESTURE_W_SCANCODE = 246
-        private const val GESTURE_M_SCANCODE = 247
-        private const val GESTURE_S_SCANCODE = 248
         private const val GESTURE_CIRCLE_SCANCODE = 250
         private const val GESTURE_V_SCANCODE = 252
         private const val GESTURE_II_SCANCODE = 251
         private const val GESTURE_LEFT_V_SCANCODE = 253
         private const val GESTURE_RIGHT_V_SCANCODE = 254
+        private const val GESTURE_A_SCANCODE = 255
         private const val GESTURE_RIGHT_SWIPE_SCANCODE = 63
         private const val GESTURE_LEFT_SWIPE_SCANCODE = 64
         private const val GESTURE_DOWN_SWIPE_SCANCODE = 65
@@ -406,53 +669,37 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
         private const val FP_GESTURE_LONG_PRESS = 305
         const val CLIENT_PACKAGE_NAME = "com.oneplus.camera"
         const val CLIENT_PACKAGE_PATH = "/data/misc/omni/client_package_name"
-
-        // TriStateUI Modes
-        const val MODE_TOTAL_SILENCE = 600
-        const val MODE_ALARMS_ONLY = 601
-        const val MODE_PRIORITY_ONLY = 602
-        const val MODE_NONE = 603
-        const val MODE_VIBRATE = 604
-        const val MODE_RING = 605
-
-        // AICP additions: arbitrary value which hopefully doesn't conflict with upstream anytime soon
-        const val MODE_SILENT = 620
-        const val MODE_FLASHLIGHT = 621
         private val sSupportedGestures = intArrayOf(
-                GESTURE_II_SCANCODE,
-                GESTURE_CIRCLE_SCANCODE,
-                GESTURE_V_SCANCODE,
-                GESTURE_M_SCANCODE,
-                GESTURE_S_SCANCODE,
-                GESTURE_W_SCANCODE,
-                GESTURE_LEFT_V_SCANCODE,
-                GESTURE_RIGHT_V_SCANCODE,
-                GESTURE_DOWN_SWIPE_SCANCODE,
-                GESTURE_UP_SWIPE_SCANCODE,
-                GESTURE_LEFT_SWIPE_SCANCODE,
-                GESTURE_RIGHT_SWIPE_SCANCODE,
-                KEY_DOUBLE_TAP,
-                KEY_SLIDER_TOP,
-                KEY_SLIDER_CENTER,
-                KEY_SLIDER_BOTTOM
+            GESTURE_II_SCANCODE,
+            GESTURE_CIRCLE_SCANCODE,
+            GESTURE_V_SCANCODE,
+            GESTURE_A_SCANCODE,
+            GESTURE_LEFT_V_SCANCODE,
+            GESTURE_RIGHT_V_SCANCODE,
+            GESTURE_DOWN_SWIPE_SCANCODE,
+            GESTURE_UP_SWIPE_SCANCODE,
+            GESTURE_LEFT_SWIPE_SCANCODE,
+            GESTURE_RIGHT_SWIPE_SCANCODE,
+            KEY_DOUBLE_TAP,
+            KEY_SLIDER_TOP,
+            KEY_SLIDER_CENTER,
+            KEY_SLIDER_BOTTOM
         )
         private val sProxiCheckedGestures = intArrayOf(
-                GESTURE_II_SCANCODE,
-                GESTURE_CIRCLE_SCANCODE,
-                GESTURE_V_SCANCODE,
-                GESTURE_M_SCANCODE,
-                GESTURE_S_SCANCODE,
-                GESTURE_W_SCANCODE,
-                GESTURE_LEFT_V_SCANCODE,
-                GESTURE_RIGHT_V_SCANCODE,
-                GESTURE_DOWN_SWIPE_SCANCODE,
-                GESTURE_UP_SWIPE_SCANCODE,
-                GESTURE_LEFT_SWIPE_SCANCODE,
-                GESTURE_RIGHT_SWIPE_SCANCODE,
-                KEY_DOUBLE_TAP
+            GESTURE_II_SCANCODE,
+            GESTURE_CIRCLE_SCANCODE,
+            GESTURE_V_SCANCODE,
+            GESTURE_A_SCANCODE,
+            GESTURE_LEFT_V_SCANCODE,
+            GESTURE_RIGHT_V_SCANCODE,
+            GESTURE_DOWN_SWIPE_SCANCODE,
+            GESTURE_UP_SWIPE_SCANCODE,
+            GESTURE_LEFT_SWIPE_SCANCODE,
+            GESTURE_RIGHT_SWIPE_SCANCODE,
+            KEY_DOUBLE_TAP
         )
         private const val mButtonDisabled = false
-        protected fun getSensor(sm: SensorManager, type: String): Sensor? {
+        fun getSensor(sm: SensorManager, type: String): Sensor? {
             for (sensor in sm.getSensorList(Sensor.TYPE_ALL)) {
                 if (type == sensor.stringType) {
                     return sensor
@@ -463,30 +710,51 @@ class KeyHandler(val context: Context) : CustomKeyHandler {
     }
 
     init {
-        mDispOn = true
         mEventHandler = EventHandler()
-        mPowerManager = mContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-        mGestureWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "GestureWakeLock")
-        mNoMan = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mAudioManager = mContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        mPowerManager =
+            mContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        mGestureWakeLock = mPowerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "GestureWakeLock"
+        )
+        mSettingsObserver = SettingsObserver(mHandler)
+        mSettingsObserver.observe()
+        mNoMan =
+            mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mAudioManager =
+            mContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        mSensorManager =
+            mContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mTiltSensor = getSensor(
+            mSensorManager,
+            "oneplus.sensor.op_motion_detect"
+        )
+        mPocketSensor =
+            getSensor(mSensorManager, "oneplus.sensor.pocket")
         val systemStateFilter = IntentFilter(Intent.ACTION_SCREEN_ON)
         systemStateFilter.addAction(Intent.ACTION_SCREEN_OFF)
         systemStateFilter.addAction(Intent.ACTION_USER_SWITCHED)
         mContext.registerReceiver(mSystemStateReceiver, systemStateFilter)
         object : UEventObserver() {
-            override fun onUEvent(event: UEventObserver.UEvent) {
+            fun onUEvent(event: UEventObserver.UEvent) {
                 try {
                     val state: String = event.get("STATE")
                     val ringing = state.contains("USB=0")
                     val silent = state.contains("(null)=0")
                     val vibrate = state.contains("USB_HOST=0")
-                    Log.v(TAG, "Got ringing = $ringing, silent = $silent, vibrate = $vibrate")
+                    Log.v(
+                        TAG,
+                        "Got ringing = $ringing, silent = $silent, vibrate = $vibrate"
+                    )
                     if (ringing && !silent && !vibrate) doHandleSliderAction(2)
                     if (silent && !ringing && !vibrate) doHandleSliderAction(0)
                     if (vibrate && !silent && !ringing) doHandleSliderAction(1)
                 } catch (e: Exception) {
-                    Log.d(TAG, "Failed parsing uevent", e)
+                    Log.d(
+                        TAG,
+                        "Failed parsing uevent",
+                        e
+                    )
                 }
             }
         }.startObserving("DEVPATH=/devices/platform/soc/soc:tri_state_key")
