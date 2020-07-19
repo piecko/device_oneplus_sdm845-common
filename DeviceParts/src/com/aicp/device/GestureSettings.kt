@@ -70,7 +70,7 @@ class GestureSettings : PreferenceFragmentCompat(), Preference.OnPreferenceChang
             "Settings.System." + KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 1) != 0
         val musicPlaybackEnabled = Settings.System.getIntForUser(
             context?.contentResolver,
-                "Settings.System." + KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 0, UserHandle.USER_CURRENT) === 1
+                "Settings.System." + KeyHandler.GESTURE_MUSIC_PLAYBACK_SETTINGS_VARIABLE_NAME, 0, UserHandle.USER_CURRENT) == 1
         setMusicPlaybackGestureEnabled(musicPlaybackEnabled)
         mCircleApp = findPreference(KEY_CIRCLE_APP) as AppSelectListPreference?
         mCircleApp!!.isEnabled = isGestureSupported(KEY_CIRCLE_APP)

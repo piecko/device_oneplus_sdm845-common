@@ -66,11 +66,11 @@ class DeviceSettings : PreferenceFragmentCompat(), Preference.OnPreferenceChange
         mSliderModeBottom!!.summary = mSliderModeBottom!!.entries[valueIndex]
         mHBMModeSwitch = findPreference(KEY_HBM_SWITCH) as TwoStatePreference?
         mHBMModeSwitch!!.isEnabled = HBMModeSwitch.isSupported
-        mHBMModeSwitch!!.isChecked = HBMModeSwitch.isCurrentlyEnabled(this.context)
+        mHBMModeSwitch!!.isChecked = HBMModeSwitch.isCurrentlyEnabled()
         mHBMModeSwitch!!.onPreferenceChangeListener = context?.let { HBMModeSwitch(it) }
         mDCDModeSwitch = findPreference(KEY_DCD_SWITCH) as TwoStatePreference?
         mDCDModeSwitch!!.isEnabled = DCDModeSwitch.isSupported
-        mDCDModeSwitch!!.isChecked = DCDModeSwitch.isCurrentlyEnabled(this.context)
+        mDCDModeSwitch!!.isChecked = DCDModeSwitch.isCurrentlyEnabled()
         mDCDModeSwitch!!.onPreferenceChangeListener = context?.let { DCDModeSwitch(it) }
     }
 

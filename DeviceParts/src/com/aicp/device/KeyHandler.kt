@@ -92,7 +92,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     override fun handleKeyEvent(event: KeyEvent): Boolean {
-        if (event.action !== KeyEvent.ACTION_UP) {
+        if (event.action != KeyEvent.ACTION_UP) {
             return false
         }
         return if (!hasSetupCompleted()) {
@@ -147,9 +147,6 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         private get() {
             val audioService: IAudioService = IAudioService.Stub
                     .asInterface(ServiceManager.checkService(Context.AUDIO_SERVICE))
-            if (audioService == null) {
-                Log.w(TAG, "Unable to find IAudioService interface.")
-            }
             return audioService
         }
 
@@ -316,14 +313,12 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         if (value == AppSelectListPreference.TORCH_ENTRY) {
             mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION)
             val service: IStatusBarService = statusBarService
-            if (service != null) {
-                try {
-                    service.toggleCameraFlash()
-                    AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
-                    return true
-                } catch (e: RemoteException) {
-                    // do nothing.
-                }
+            try {
+                service.toggleCameraFlash()
+                AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
+                return true
+            } catch (e: RemoteException) {
+                // do nothing.
             }
         } else if (value == AppSelectListPreference.AMBIENT_DISPLAY_ENTRY) {
             AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
@@ -376,7 +371,6 @@ class KeyHandler(context: Context) : CustomKeyHandler {
 
     private inner class ClientPackageNameObserver(file: String?) : FileObserver(File(CLIENT_PACKAGE_PATH), MODIFY) {
         override fun onEvent(event: Int, file: String?) {
-            val pkgName = Utils.getFileValue(CLIENT_PACKAGE_PATH, "0")
         }
     }
 

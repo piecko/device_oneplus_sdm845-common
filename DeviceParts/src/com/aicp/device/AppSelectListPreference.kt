@@ -62,8 +62,8 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
             mValue = value
         }
 
-        override fun compareTo(another: PackageItem): Int {
-            return mTitle.toString().toUpperCase(Locale.ROOT).compareTo(another.mTitle.toString().toUpperCase(
+        override fun compareTo(other: PackageItem): Int {
+            return mTitle.toString().toUpperCase(Locale.ROOT).compareTo(other.mTitle.toString().toUpperCase(
                 Locale.ROOT
             )
             )
@@ -73,10 +73,10 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
             return mValue.hashCode()
         }
 
-        override fun equals(another: Any?): Boolean {
-            return if (another == null || another !is PackageItem) {
+        override fun equals(other: Any?): Boolean {
+            return if (other == null || other !is PackageItem) {
                 false
-            } else mValue == another.mValue
+            } else mValue == other.mValue
         }
     }
 
@@ -134,7 +134,7 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
         init()
     }
 
-    constructor(context: Context?, color: Int) : super(context, null) {
+    constructor(context: Context?) : super(context, null) {
         init()
     }
 
@@ -214,7 +214,7 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
     }
 
     private fun updatePreferenceViews() {
-        var name: String? = null
+        var name: String?
         name = if (shouldPersist()) {
             getPersistedString(null)
         } else {

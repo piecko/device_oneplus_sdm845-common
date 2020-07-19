@@ -44,7 +44,7 @@ class SRGBModeSwitch(context: Context) : OnPreferenceChangeListener {
             get() = Utils.fileWritable(file)
 
         @JvmStatic
-        fun isCurrentlyEnabled(context: Context?): Boolean {
+        fun isCurrentlyEnabled(): Boolean {
             return Utils.getFileValueAsBoolean(file, false)
         }
     }

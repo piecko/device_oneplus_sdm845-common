@@ -28,7 +28,6 @@ class PanelSettingsActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.setDisplayHomeAsUpEnabled(true)
-        val fragment: Fragment? = supportFragmentManager.findFragmentById(android.R.id.content)
             mPanelSettingsFragment = PanelSettings()
             supportFragmentManager.beginTransaction()
                     .add(android.R.id.content, mPanelSettingsFragment!!)

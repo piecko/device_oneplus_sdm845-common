@@ -47,7 +47,7 @@ class WideModeSwitch(context: Context) : OnPreferenceChangeListener {
             get() = fileWritable(file)
 
         @JvmStatic
-        fun isCurrentlyEnabled(context: Context?): Boolean {
+        fun isCurrentlyEnabled(): Boolean {
             return getFileValueAsBoolean(file, false)
         }
     }
