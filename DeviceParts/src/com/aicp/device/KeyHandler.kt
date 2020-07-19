@@ -38,9 +38,6 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.WindowManagerGlobal
-import com.aicp.device.GestureSettings
-import com.aicp.device.KeyHandler.ClientPackageNameObserver
-import com.aicp.device.KeyHandler.SettingsObserver
 import com.aicp.device.Utils.fileWritable
 import com.aicp.device.Utils.getFileValue
 import com.aicp.device.Utils.writeValue
