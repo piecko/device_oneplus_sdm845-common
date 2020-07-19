@@ -41,11 +41,11 @@ import android.view.WindowManagerGlobal
 import com.aicp.device.Utils.fileWritable
 import com.aicp.device.Utils.getFileValue
 import com.aicp.device.Utils.writeValue
+import com.android.internal.os.DeviceKeyHandler
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.util.ArrayUtils
 import com.android.internal.util.aicp.AicpUtils
 import com.android.internal.util.aicp.AicpVibe
-import com.android.internal.util.aicp.DeviceKeyHandler
 import com.android.internal.util.aicp.PackageUtils
 
 class KeyHandler(val mContext: Context) : DeviceKeyHandler {
