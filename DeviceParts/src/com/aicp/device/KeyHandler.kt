@@ -18,7 +18,7 @@
 */
 package com.aicp.device
 
-import android.app.ActivityManagerNative
+import android.app.ActivityManagerInternal
 import android.app.NotificationManager
 import android.content.*
 import android.hardware.Sensor
@@ -144,17 +144,16 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     private val audioService: IAudioService?
-        private get() {
-            val audioService: IAudioService = IAudioService.Stub
+        get() {
+            return IAudioService.Stub
                     .asInterface(ServiceManager.checkService(Context.AUDIO_SERVICE))
-            return audioService
         }
 
     val isMusicActive: Boolean
         get() = mAudioManager.isMusicActive
 
     private fun dispatchMediaKeyWithWakeLockToAudioService(keycode: Int) {
-        if (ActivityManagerNative.isSystemReady()) {
+        if (ActivityManagerInternal.isSystemReady()) {
             val audioService: IAudioService? = audioService
             if (audioService != null) {
                 var event = KeyEvent(SystemClock.uptimeMillis(),
@@ -168,7 +167,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     private fun dispatchMediaKeyEventUnderWakelock(event: KeyEvent) {
-        if (ActivityManagerNative.isSystemReady()) {
+        if (ActivityManagerInternal.isSystemReady()) {
             MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true)
         }
     }

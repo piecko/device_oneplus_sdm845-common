@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.drawable.Drawable
-import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +32,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.android.settingslib.CustomDialogPreferenceCompat
 import java.util.*
 
-class AppSelectListPreference : CustomDialogPreferenceCompat {
+class AppSelectListPreference(context: Context?) : CustomDialogPreferenceCompat(context, null) {
     private var mAdapter: AppSelectListAdapter? = null
     private var mAppIconDrawable: Drawable? = null
     private var mAppIconResourceId = 0
@@ -96,12 +95,11 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
         }
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
-            var convertView: View? = convertView
-            convertView = mInflater.inflate(R.layout.applist_preference_icon, null, false)
+            val convertView2 = mInflater.inflate(R.layout.applist_preference_icon, null, false)
             val holder: ViewHolder = ViewHolder()
-                convertView.setTag(holder)
-                holder.title = convertView.findViewById(R.id.title) as TextView
-                holder.icon = convertView.findViewById(R.id.icon) as ImageView
+            convertView2.tag = holder
+                holder.title = convertView2.findViewById(R.id.title) as TextView
+                holder.icon = convertView2.findViewById(R.id.icon) as ImageView
             val applicationInfo = getItem(position)
             holder.title!!.text = applicationInfo.mTitle
             if (applicationInfo.mAppIconResourceId != 0) {
@@ -124,18 +122,9 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
 
         private inner class ViewHolder {
             var title: TextView? = null
-            var summary: TextView? = null
             var icon: ImageView? = null
         }
 
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
-        init()
-    }
-
-    constructor(context: Context?) : super(context, null) {
-        init()
     }
 
     fun setPackageList(installedPackages: List<PackageItem>?) {
@@ -214,8 +203,7 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
     }
 
     private fun updatePreferenceViews() {
-        var name: String?
-        name = if (shouldPersist()) {
+        val name: String? = if (shouldPersist()) {
             getPersistedString(null)
         } else {
             value
@@ -288,5 +276,9 @@ class AppSelectListPreference : CustomDialogPreferenceCompat {
         const val MUSIC_NEXT_ENTRY = "music_next"
         const val WAKE_ENTRY = "wake"
         const val AMBIENT_DISPLAY_ENTRY = "ambient_display"
+    }
+
+    init {
+        init()
     }
 }
