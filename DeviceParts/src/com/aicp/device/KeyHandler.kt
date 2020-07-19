@@ -50,7 +50,7 @@ import com.android.internal.util.aicp.CustomKeyHandler
 import com.android.internal.util.aicp.PackageUtils
 
 open class KeyHandler(context: Context) : CustomKeyHandler {
-    protected val mContext: Context = context
+    val mContext: Context = context
     private val mPowerManager: PowerManager
     private val mEventHandler: EventHandler
     private val mGestureWakeLock: WakeLock
