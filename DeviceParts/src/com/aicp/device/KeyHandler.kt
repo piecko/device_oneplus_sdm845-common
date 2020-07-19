@@ -18,7 +18,7 @@
 */
 package com.aicp.device
 
-import android.app.ActivityManagerInternal
+import android.app.ActivityManager
 import android.app.NotificationManager
 import android.content.*
 import android.hardware.Sensor
@@ -120,9 +120,9 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         if (event.action != KeyEvent.ACTION_UP) {
             return false
         }
-        val value = getGestureValueForScanCode(event.getScanCode())
+        val value = getGestureValueForScanCode(event.scanCode)
         if (!TextUtils.isEmpty(value) && value == AppSelectListPreference.WAKE_ENTRY) {
-            if (DEBUG) Log.i(TAG, "isWakeEvent " + event.getScanCode().toString() + value)
+            if (DEBUG) Log.i(TAG, "isWakeEvent " + event.scanCode.toString() + value)
             return true
         }
         return event.scanCode == KEY_DOUBLE_TAP
@@ -134,7 +134,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         }
         val value = getGestureValueForScanCode(event.scanCode)
         if (!TextUtils.isEmpty(value) && value != AppSelectListPreference.DISABLED_ENTRY) {
-            if (DEBUG) Log.i(TAG, "isActivityLaunchEvent " + event.getScanCode().toString() + value)
+            if (DEBUG) Log.i(TAG, "isActivityLaunchEvent " + event.scanCode.toString() + value)
             if (!launchSpecialActions(value)) {
                 AicpVibe.performHapticFeedbackLw(HapticFeedbackConstants.LONG_PRESS, false, mContext, GESTURE_HAPTIC_SETTINGS_VARIABLE_NAME, GESTURE_HAPTIC_DURATION)
                 return createIntent(value)
@@ -153,7 +153,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
         get() = mAudioManager.isMusicActive
 
     private fun dispatchMediaKeyWithWakeLockToAudioService(keycode: Int) {
-        if (ActivityManagerInternal.isSystemReady()) {
+        if (ActivityManager.isSystemReady()) {
             val audioService: IAudioService? = audioService
             if (audioService != null) {
                 var event = KeyEvent(SystemClock.uptimeMillis(),
@@ -167,7 +167,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     private fun dispatchMediaKeyEventUnderWakelock(event: KeyEvent) {
-        if (ActivityManagerInternal.isSystemReady()) {
+        if (ActivityManager.isSystemReady()) {
             MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true)
         }
     }
@@ -181,7 +181,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     private fun getSliderAction(position: Int): Int {
-        var value: String? = Settings.System.getStringForUser(mContext.getContentResolver(),
+        var value: String? = Settings.System.getStringForUser(mContext.contentResolver,
                 Settings.System.OMNI_BUTTON_EXTRA_KEY_MAPPING,
                 UserHandle.USER_CURRENT)
         val defaultValue = DeviceSettings.SLIDER_DEFAULT_VALUE
@@ -270,7 +270,7 @@ class KeyHandler(context: Context) : CustomKeyHandler {
     }
 
     private fun createIntent(value: String?): Intent {
-        val componentName: ComponentName = ComponentName.unflattenFromString(value)
+        val componentName: ComponentName? = ComponentName.unflattenFromString(value)
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
