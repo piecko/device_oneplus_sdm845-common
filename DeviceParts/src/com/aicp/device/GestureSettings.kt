@@ -29,10 +29,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.TwoStatePreference
-import com.aicp.device.AppSelectListPreference
 import com.aicp.device.AppSelectListPreference.PackageItem
 import com.aicp.device.Utils.fileWritable
 import com.aicp.device.Utils.writeValue
+import com.android.settingslib.CustomDialogPreferenceCompat
 import java.util.*
 
 class GestureSettings : PreferenceFragmentCompat(),
@@ -358,7 +358,7 @@ class GestureSettings : PreferenceFragmentCompat(),
             return
         }
         val fragment: DialogFragment =
-            AppSelectListPreference.AppSelectListPreferenceDialogFragment
+            CustomDialogPreferenceCompat.CustomPreferenceDialogFragment
                 .newInstance(preference.getKey())
         fragment.setTargetFragment(this, 0)
         parentFragmentManager.let { fragment.show(it, "dialog_preference") }
